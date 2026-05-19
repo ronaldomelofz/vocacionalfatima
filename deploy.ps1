@@ -1,5 +1,7 @@
-# Deploy para vocacionalfatima.netlify.app
-# Requer: netlify login (sessão ativa)
+# Deploy manual para vocacionalfatima.netlify.app
+# Preferência: conectar o repositório GitHub no Netlify (deploy automático a cada push)
+# https://github.com/ronaldomelofz/vocacionalfatima
+# Requer: netlify login (sessão ativa) — apenas para deploy manual
 
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
