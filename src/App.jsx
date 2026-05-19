@@ -1,45 +1,25 @@
 import { useState, useRef, useEffect } from "react";
 
-// ── Tokens visuais (tipografia e contraste) ───────────────────────────────
-const T = {
-  fontDisplay: "'Cormorant Garamond', Georgia, serif",
-  fontBody: "'Source Sans 3', 'Segoe UI', sans-serif",
-  gold: "#E8C878",
-  goldSoft: "#C9A84C",
-  text: "#FAF6EE",
-  textSoft: "#DDD4C6",
-  textBody: "#C8BDB0",
-  textMuted: "#9E9286",
-  textFaint: "#6E645A",
-  bg: "#0c0a08",
-  label: { fontSize: 11, letterSpacing: "0.22em", fontWeight: 600 },
-  h1: { fontSize: "clamp(1.75rem, 6vw, 2.5rem)", lineHeight: 1.2 },
-  h2: { fontSize: "clamp(1.35rem, 4vw, 1.75rem)", lineHeight: 1.3 },
-  body: { fontSize: "1.05rem", lineHeight: 1.75 },
-  bodyLg: { fontSize: "1.125rem", lineHeight: 1.8 },
-  small: { fontSize: "0.9375rem", lineHeight: 1.65 },
-};
-
 // ── 18 PASTORAIS da Paróquia N. Sra. de Fátima — Teresina, PI ─────────────
 const PASTORAIS = {
-  liturgia:     { id:"liturgia",     nome:"Pastoral Litúrgica & Acólitos",               icon:"✝️",  color:"#E07070", bg:"rgba(180,70,70,0.18)",      desc:"Planeja e anima as celebrações eucarísticas. Os acólitos servem no altar junto ao padre nos momentos mais sagrados da Missa.",                    url:"https://nsfatima.org.br/pastoral-liturgica/" },
-  enfermos:     { id:"enfermos",     nome:"Pastoral dos Enfermos / Min. da Eucaristia",  icon:"🤲",  color:"#5EC9A0", bg:"rgba(60,180,140,0.18)",    desc:"Leva a Eucaristia e a Palavra de Deus a enfermos e acamados. Auxilia o padre no altar e acompanha quem sofre com presença espiritual.",           url:"https://nsfatima.org.br/pastoral-dos-enfermos-mm-ee-ee/" },
-  catequese:    { id:"catequese",    nome:"Catequese & Escola da Fé Santa Edith Stein",  icon:"📖",  color:"#7EB8F5", bg:"rgba(90,160,240,0.2)",    desc:"Acompanha crianças, jovens e adultos na jornada da fé. A Escola da Fé aprofunda o conhecimento teológico e espiritual dos fiéis.",                  url:"https://nsfatima.org.br/catequese/" },
-  batismo:      { id:"batismo",      nome:"Pastoral do Batismo",                         icon:"💧",  color:"#4DD4E8", bg:"rgba(50,190,210,0.18)",   desc:"Prepara pais e padrinhos para as exigências do compromisso batismal, acompanhando as famílias desde o início da vida cristã.",                    url:"https://nsfatima.org.br/pastoral-do-batismo/" },
-  juventude:    { id:"juventude",    nome:"Pastoral da Juventude",                       icon:"🔥",  color:"#F0A050", bg:"rgba(230,150,60,0.18)",     desc:"Ação da Igreja no meio jovem, em sintonia com as diretrizes da CNBB. Grupos de fé, retiros, missões e formação integral do jovem cristão.",        url:"https://nsfatima.org.br/pastoral-da-juventude/" },
-  familia:      { id:"familia",      nome:"Pastoral da Família",                         icon:"🏠",  color:"#8ED06A", bg:"rgba(120,190,90,0.18)",    desc:"Possibilita a evangelização da família segundo as diretrizes da Igreja, acompanhando e fortalecendo os lares na vivência cristã.",                  url:"https://nsfatima.org.br/familia/" },
-  casais:       { id:"casais",       nome:"ECC / Equipes de N. Sra. / Novos Casais",     icon:"💍",  color:"#E88AB8", bg:"rgba(220,120,170,0.18)",   desc:"Engloba o Encontro de Casais com Cristo (ECC), as Equipes de Nossa Senhora e a Pastoral dos Novos Casais — evangelização do matrimônio.",          url:"https://nsfatima.org.br/e-c-c/" },
-  matrimonio:   { id:"matrimonio",   nome:"Preparação para o Matrimônio",                icon:"💒",  color:"#D87AB0", bg:"rgba(200,110,170,0.18)",    desc:"Prepara noivos para a celebração e vivência do Sacramento do Matrimônio, com orientações sobre os aspectos humanos, cristãos e canônicos.",         url:"https://nsfatima.org.br/preparacao-para-o-matrimonio/" },
-  misericordia: { id:"misericordia", nome:"Pastoral da Misericórdia",                    icon:"❤️",  color:"#F07090", bg:"rgba(230,90,120,0.18)",    desc:"Com sede no Centro Pastoral Bom Samaritano. Atua nas periferias com ações concretas de misericórdia, solidariedade e cuidado aos mais pobres.",   url:"https://nsfatima.org.br/pastoral-da-misericordia/" },
-  menor:        { id:"menor",        nome:"Pastoral do Menor",                           icon:"🌱",  color:"#6EC86E", bg:"rgba(90,180,90,0.18)",    desc:"Acompanha crianças e adolescentes em situação de risco social, com educação informal, orientação escolar e acompanhamento familiar.",               url:"https://nsfatima.org.br/pastoral-do-menor/" },
-  idoso:        { id:"idoso",        nome:"Pastoral do Idoso",                           icon:"🌿",  color:"#A8C85A", bg:"rgba(150,190,80,0.18)",    desc:"Cuida da dignidade e espiritualidade da pessoa idosa, promovendo inclusão, visitas e atenção pastoral aos mais velhos da comunidade.",             url:"https://nsfatima.org.br/idoso/" },
-  maria:        { id:"maria",        nome:"Legião de Maria / Peregrinos com Maria",       icon:"🌹",  color:"#98A8F0", bg:"rgba(130,150,230,0.18)",    desc:"Busca Jesus Cristo através de Maria. Visita hospitais, pratica caridade e anima o terço, novenas e peregrinações na devoção popular.",            url:"https://nsfatima.org.br/legiao-de-maria-adultos/" },
-  rcc:          { id:"rcc",          nome:"Renovação Carismática Católica — R.C.C.",      icon:"🕊️",  color:"#B898F0", bg:"rgba(170,140,230,0.18)",   desc:"Evangeliza por encontros de espiritualidade e celebrações, com ênfase nos carismas do Espírito Santo, na vocação missionária e na Palavra.",      url:"https://nsfatima.org.br/r-c-c/" },
-  vocacional:   { id:"vocacional",   nome:"Pastoral Vocacional",                         icon:"⚜️",  color:"#A0A0F0", bg:"rgba(140,140,220,0.18)",    desc:"Motiva os batizados a reconhecerem-se chamados pelo Pai, escolhidos pelo Filho e enviados em missão — acompanha o discernimento vocacional.",       url:"https://nsfatima.org.br/pastoral-vocacional/" },
-  acolhimento:  { id:"acolhimento",  nome:"Pastoral do Acolhimento & Integração",        icon:"🤝",  color:"#D4A85A", bg:"rgba(200,160,80,0.18)",    desc:"Recebe com carinho quem busca a Igreja, criando ambiente acolhedor para que todos se sintam em casa e participem ativamente da comunidade.",        url:"https://nsfatima.org.br/pastoral-do-acolhimento/" },
-  comunicacao:  { id:"comunicacao",  nome:"Pastoral da Comunicação",                     icon:"📡",  color:"#5AC8E8", bg:"rgba(70,180,220,0.18)",   desc:"Estimula a comunicação em toda a comunidade, utilizando mídias modernas — redes sociais, fotografia, vídeo e transmissões ao vivo da paróquia.",  url:"https://nsfatima.org.br/comunicacao/" },
-  campanha:     { id:"campanha",     nome:"Campanha da Fraternidade & Tempos Fortes",    icon:"✊",  color:"#E89060", bg:"rgba(220,130,80,0.18)",    desc:"Evangeliza a partir do tema anual da CF, denunciando injustiças que ferem a dignidade humana e animando a comunidade nas datas especiais.",        url:"https://nsfatima.org.br/campanha-da-fraternidade/" },
-  dizimo:       { id:"dizimo",       nome:"Dízimo & Sustentação Paroquial",              icon:"🕯️",  color:"#D4B060", bg:"rgba(200,170,80,0.18)",    desc:"Trabalha pela auto-sustentação da paróquia, conscientizando os fiéis sobre a corresponsabilidade na manutenção e crescimento da comunidade.",      url:"https://nsfatima.org.br/dizimo-2/" },
+  liturgia:     { id:"liturgia",     nome:"Pastoral Litúrgica & Acólitos",               icon:"✝️",  color:"#8B0000", bg:"rgba(139,0,0,0.13)",      desc:"Planeja e anima as celebrações eucarísticas. Os acólitos servem no altar junto ao padre nos momentos mais sagrados da Missa.",                    url:"https://nsfatima.org.br/pastoral-liturgica/" },
+  enfermos:     { id:"enfermos",     nome:"Pastoral dos Enfermos / Min. da Eucaristia",  icon:"🤲",  color:"#2A7A5A", bg:"rgba(42,122,90,0.13)",    desc:"Leva a Eucaristia e a Palavra de Deus a enfermos e acamados. Auxilia o padre no altar e acompanha quem sofre com presença espiritual.",           url:"https://nsfatima.org.br/pastoral-dos-enfermos-mm-ee-ee/" },
+  catequese:    { id:"catequese",    nome:"Catequese & Escola da Fé Santa Edith Stein",  icon:"📖",  color:"#1a4a8a", bg:"rgba(26,74,138,0.13)",    desc:"Acompanha crianças, jovens e adultos na jornada da fé. A Escola da Fé aprofunda o conhecimento teológico e espiritual dos fiéis.",                  url:"https://nsfatima.org.br/catequese/" },
+  batismo:      { id:"batismo",      nome:"Pastoral do Batismo",                         icon:"💧",  color:"#0A7B8E", bg:"rgba(10,123,142,0.13)",   desc:"Prepara pais e padrinhos para as exigências do compromisso batismal, acompanhando as famílias desde o início da vida cristã.",                    url:"https://nsfatima.org.br/pastoral-do-batismo/" },
+  juventude:    { id:"juventude",    nome:"Pastoral da Juventude",                       icon:"🔥",  color:"#B85E00", bg:"rgba(184,94,0,0.13)",     desc:"Ação da Igreja no meio jovem, em sintonia com as diretrizes da CNBB. Grupos de fé, retiros, missões e formação integral do jovem cristão.",        url:"https://nsfatima.org.br/pastoral-da-juventude/" },
+  familia:      { id:"familia",      nome:"Pastoral da Família",                         icon:"🏠",  color:"#4a7a30", bg:"rgba(74,122,48,0.13)",    desc:"Possibilita a evangelização da família segundo as diretrizes da Igreja, acompanhando e fortalecendo os lares na vivência cristã.",                  url:"https://nsfatima.org.br/familia/" },
+  casais:       { id:"casais",       nome:"ECC / Equipes de N. Sra. / Novos Casais",     icon:"💍",  color:"#8B3A6A", bg:"rgba(139,58,106,0.13)",   desc:"Engloba o Encontro de Casais com Cristo (ECC), as Equipes de Nossa Senhora e a Pastoral dos Novos Casais — evangelização do matrimônio.",          url:"https://nsfatima.org.br/e-c-c/" },
+  matrimonio:   { id:"matrimonio",   nome:"Preparação para o Matrimônio",                icon:"💒",  color:"#7A3060", bg:"rgba(122,48,96,0.13)",    desc:"Prepara noivos para a celebração e vivência do Sacramento do Matrimônio, com orientações sobre os aspectos humanos, cristãos e canônicos.",         url:"https://nsfatima.org.br/preparacao-para-o-matrimonio/" },
+  misericordia: { id:"misericordia", nome:"Pastoral da Misericórdia",                    icon:"❤️",  color:"#8B1A3A", bg:"rgba(139,26,58,0.13)",    desc:"Com sede no Centro Pastoral Bom Samaritano. Atua nas periferias com ações concretas de misericórdia, solidariedade e cuidado aos mais pobres.",   url:"https://nsfatima.org.br/pastoral-da-misericordia/" },
+  menor:        { id:"menor",        nome:"Pastoral do Menor",                           icon:"🌱",  color:"#3A7A3A", bg:"rgba(58,122,58,0.13)",    desc:"Acompanha crianças e adolescentes em situação de risco social, com educação informal, orientação escolar e acompanhamento familiar.",               url:"https://nsfatima.org.br/pastoral-do-menor/" },
+  idoso:        { id:"idoso",        nome:"Pastoral do Idoso",                           icon:"🌿",  color:"#5A7A2A", bg:"rgba(90,122,42,0.13)",    desc:"Cuida da dignidade e espiritualidade da pessoa idosa, promovendo inclusão, visitas e atenção pastoral aos mais velhos da comunidade.",             url:"https://nsfatima.org.br/idoso/" },
+  maria:        { id:"maria",        nome:"Legião de Maria / Peregrinos com Maria",       icon:"🌹",  color:"#4A5A9B", bg:"rgba(74,90,155,0.13)",    desc:"Busca Jesus Cristo através de Maria. Visita hospitais, pratica caridade e anima o terço, novenas e peregrinações na devoção popular.",            url:"https://nsfatima.org.br/legiao-de-maria-adultos/" },
+  rcc:          { id:"rcc",          nome:"Renovação Carismática Católica — R.C.C.",      icon:"🕊️",  color:"#6A4A9B", bg:"rgba(106,74,155,0.13)",   desc:"Evangeliza por encontros de espiritualidade e celebrações, com ênfase nos carismas do Espírito Santo, na vocação missionária e na Palavra.",      url:"https://nsfatima.org.br/r-c-c/" },
+  vocacional:   { id:"vocacional",   nome:"Pastoral Vocacional",                         icon:"⚜️",  color:"#4A4A8B", bg:"rgba(74,74,139,0.13)",    desc:"Motiva os batizados a reconhecerem-se chamados pelo Pai, escolhidos pelo Filho e enviados em missão — acompanha o discernimento vocacional.",       url:"https://nsfatima.org.br/pastoral-vocacional/" },
+  acolhimento:  { id:"acolhimento",  nome:"Pastoral do Acolhimento & Integração",        icon:"🤝",  color:"#7A5A2A", bg:"rgba(122,90,42,0.13)",    desc:"Recebe com carinho quem busca a Igreja, criando ambiente acolhedor para que todos se sintam em casa e participem ativamente da comunidade.",        url:"https://nsfatima.org.br/pastoral-do-acolhimento/" },
+  comunicacao:  { id:"comunicacao",  nome:"Pastoral da Comunicação",                     icon:"📡",  color:"#1e6b8a", bg:"rgba(30,107,138,0.13)",   desc:"Estimula a comunicação em toda a comunidade, utilizando mídias modernas — redes sociais, fotografia, vídeo e transmissões ao vivo da paróquia.",  url:"https://nsfatima.org.br/comunicacao/" },
+  campanha:     { id:"campanha",     nome:"Campanha da Fraternidade & Tempos Fortes",    icon:"✊",  color:"#8B3A1A", bg:"rgba(139,58,26,0.13)",    desc:"Evangeliza a partir do tema anual da CF, denunciando injustiças que ferem a dignidade humana e animando a comunidade nas datas especiais.",        url:"https://nsfatima.org.br/campanha-da-fraternidade/" },
+  dizimo:       { id:"dizimo",       nome:"Dízimo & Sustentação Paroquial",              icon:"🕯️",  color:"#6A4A1A", bg:"rgba(106,74,26,0.13)",    desc:"Trabalha pela auto-sustentação da paróquia, conscientizando os fiéis sobre a corresponsabilidade na manutenção e crescimento da comunidade.",      url:"https://nsfatima.org.br/dizimo-2/" },
 };
 
 // ── 12 PERGUNTAS VOCACIONAIS ──────────────────────────────────────────────
@@ -273,18 +253,60 @@ async function chamarIA(prompt) {
   }
 }
 
+// ── PALETA E TIPOGRAFIA ────────────────────────────────────────────────────
+const T = {
+  bg: "#0c0a08",
+  surface: "rgba(255,255,255,0.045)",
+  border: "rgba(255,255,255,0.1)",
+  text: "#f6f0e4",
+  textSoft: "#d4c8b4",
+  muted: "#a89880",
+  gold: "#e8c96a",
+  goldDim: "#c9a84c",
+  sans: "'Segoe UI', system-ui, -apple-system, sans-serif",
+  serif: "Georgia, 'Times New Roman', serif",
+};
+
 // ── ESTILOS GLOBAIS ────────────────────────────────────────────────────────
 const css = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0c0a08; }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  html, body, #root { height: 100%; background: ${T.bg}; }
+  html.quiz-lock, html.quiz-lock body, html.quiz-lock #root { overflow: hidden; }
+  body { font-family: ${T.serif}; color: ${T.text}; -webkit-font-smoothing: antialiased; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
   @keyframes spin { to{transform:rotate(360deg)} }
   details > summary { list-style: none; }
   details > summary::-webkit-details-marker { display: none; }
   a { text-decoration: none; }
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(232,200,120,0.35); border-radius: 3px; }
+  .app-shell { min-height: 100dvh; max-height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+  .app-shell.scrollable { overflow-y: auto; max-height: none; min-height: 100dvh; }
+  .quiz-header { flex-shrink: 0; padding: 8px 16px; border-bottom: 1px solid ${T.border}; background: rgba(0,0,0,0.45); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .quiz-header span { font-family: ${T.sans}; font-size: 11px; color: ${T.muted}; letter-spacing: 0.02em; }
+  .quiz-body { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 10px 14px 14px; overflow: hidden; }
+  .quiz-card { width: 100%; max-width: 720px; max-height: 100%; display: flex; flex-direction: column; gap: 8px; animation: fadeUp 0.35s ease; }
+  .quiz-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .quiz-meta .cat { font-family: ${T.sans}; font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: ${T.gold}; }
+  .quiz-meta .num { font-family: ${T.sans}; font-size: 10px; color: ${T.muted}; }
+  .quiz-title { font-size: clamp(15px, 2.2vh, 19px); font-weight: 400; line-height: 1.35; color: ${T.text}; flex-shrink: 0; }
+  .quiz-sub { font-family: ${T.sans}; font-size: clamp(11px, 1.5vh, 12.5px); line-height: 1.4; color: ${T.muted}; font-style: italic; flex-shrink: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .quiz-options { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; }
+  .quiz-opt { display: flex; align-items: flex-start; gap: 8px; padding: 10px 11px; background: ${T.surface}; border: 1px solid ${T.border}; border-radius: 10px; cursor: pointer; text-align: left; width: 100%; height: 100%; transition: border-color 0.15s, background 0.15s, transform 0.15s; overflow: hidden; }
+  .quiz-opt:hover:not(:disabled) { background: rgba(255,255,255,0.07); border-color: rgba(232,201,106,0.35); transform: translateY(-1px); }
+  .quiz-opt:disabled { cursor: default; }
+  .quiz-opt.dim { opacity: 0.25; }
+  .quiz-opt.sel { border-width: 1.5px; }
+  .quiz-opt-letter { min-width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: ${T.sans}; font-size: 10px; font-weight: 700; border: 1px solid ${T.border}; color: ${T.muted}; }
+  .quiz-opt-text { font-family: ${T.sans}; font-size: clamp(11px, 1.45vh, 12.5px); line-height: 1.35; color: ${T.textSoft}; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+  .quiz-opt.sel .quiz-opt-text { color: ${T.text}; }
+  .result-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 14px 20px; }
+  .result-scroll::-webkit-scrollbar { width: 5px; }
+  .result-scroll::-webkit-scrollbar-thumb { background: rgba(232,201,106,0.25); border-radius: 3px; }
+  @media (max-width: 560px), (max-height: 620px) {
+    .quiz-options { grid-template-columns: 1fr; grid-template-rows: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .quiz-body { padding: 8px 10px 10px; }
+    .quiz-opt { padding: 8px 10px; }
+    .quiz-opt-text { -webkit-line-clamp: 3; }
+  }
 `;
 
 // ── COMPONENTES AUXILIARES ─────────────────────────────────────────────────
@@ -299,15 +321,7 @@ function Cross() {
 
 function Pill({ children }) {
   return (
-    <span style={{ padding:"6px 14px", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.12)", borderRadius:999, fontSize:"0.9rem", color:T.textBody, fontFamily:T.fontBody, fontWeight:500 }}>
-      {children}
-    </span>
-  );
-}
-
-function Label({ children, color = T.gold, style = {} }) {
-  return (
-    <span style={{ ...T.label, color, textTransform:"uppercase", ...style }}>
+    <span style={{ padding:"4px 12px", background:T.surface, border:`1px solid ${T.border}`, borderRadius:999, fontSize:11, fontFamily:T.sans, color:T.muted }}>
       {children}
     </span>
   );
@@ -315,12 +329,12 @@ function Label({ children, color = T.gold, style = {} }) {
 
 function ProgressDots({ atual, total }) {
   return (
-    <div style={{ display:"flex", gap:3 }}>
+    <div style={{ display:"flex", gap:3, flexShrink:0 }}>
       {Array.from({ length: total }).map((_, i) => (
         <div key={i} style={{
-          height:3, borderRadius:999,
-          width: i < atual ? 18 : i === atual ? 10 : 6,
-          background: i < atual ? "linear-gradient(90deg,#C9A84C,#8B6B2E)" : i === atual ? "rgba(201,168,76,0.45)" : "rgba(255,255,255,0.07)",
+          height:4, borderRadius:999,
+          width: i < atual ? 16 : i === atual ? 10 : 5,
+          background: i < atual ? `linear-gradient(90deg,${T.gold},${T.goldDim})` : i === atual ? "rgba(232,201,106,0.5)" : "rgba(255,255,255,0.08)",
           transition:"all 0.4s ease",
         }}/>
       ))}
@@ -331,67 +345,57 @@ function ProgressDots({ atual, total }) {
 function Spinner() {
   return (
     <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:16, padding:"32px 0" }}>
-      <div style={{ width:40, height:40, borderRadius:"50%", border:"3px solid rgba(232,200,120,0.25)", borderTopColor:T.gold, animation:"spin 0.9s linear infinite" }}/>
-      <p style={{ ...T.body, color:T.textMuted, fontStyle:"italic", fontFamily:T.fontBody }}>Gerando seu resultado personalizado...</p>
+      <div style={{ width:32, height:32, borderRadius:"50%", border:"2px solid rgba(201,168,76,0.15)", borderTopColor:"#C9A84C", animation:"spin 0.9s linear infinite" }}/>
+      <p style={{ fontSize:13, color:"#6a5a4a", fontStyle:"italic" }}>Gerando seu resultado personalizado...</p>
     </div>
   );
 }
 
-const CORES_OPC = ["#E07070","#7EB8F5","#8ED06A","#F0A050"];
+const CORES_OPC = ["#8B0000","#1a4a8a","#4a7a30","#7A5000"];
 
 function QuestionCard({ pergunta, numero, total, selecionada, onSelect }) {
   const [hov, setHov] = useState(null);
-  const [vis, setVis] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setVis(true), 40); return () => clearTimeout(t); }, [pergunta.id]);
+  useEffect(() => { setHov(null); }, [pergunta.id]);
 
   return (
-    <div style={{
-      opacity: vis ? 1 : 0, transform: vis ? "translateY(0)" : "translateY(18px)",
-      transition:"all 0.45s cubic-bezier(.16,1,.3,1)", maxWidth:620, margin:"0 auto", width:"100%", paddingBottom:40,
-    }}>
-      <div style={{ marginBottom:4, display:"flex", alignItems:"center", gap:8 }}>
-        <Label color={T.gold}>{pergunta.cat}</Label>
-        <span style={{ fontSize:11, color:T.textFaint }}>·</span>
-        <span style={{ ...T.label, color:T.textMuted }}>{numero} de {total}</span>
+    <div className="quiz-card" key={pergunta.id}>
+      <div className="quiz-meta">
+        <span className="cat">{pergunta.cat}</span>
+        <span className="num">· {numero} de {total}</span>
       </div>
-      <h2 style={{ ...T.h2, fontFamily:T.fontDisplay, fontWeight:500, color:T.text, marginBottom:10 }}>
-        {pergunta.texto}
-      </h2>
-      <p style={{ ...T.body, color:T.textBody, marginBottom:26, fontStyle:"italic", fontFamily:T.fontBody }}>
-        {pergunta.sub}
-      </p>
-      <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+      <h2 className="quiz-title">{pergunta.texto}</h2>
+      <p className="quiz-sub">{pergunta.sub}</p>
+      <div className="quiz-options">
         {pergunta.opcoes.map((opt, i) => {
           const isSel = selecionada === i;
           const isDim = selecionada !== null && !isSel;
           const c = CORES_OPC[i];
           return (
-            <button key={i}
+            <button
+              key={i}
+              type="button"
+              title={opt.texto}
+              className={`quiz-opt${isSel ? " sel" : ""}${isDim ? " dim" : ""}`}
               onClick={() => selecionada === null && onSelect(i, opt)}
               disabled={selecionada !== null}
               onMouseEnter={() => selecionada === null && setHov(i)}
               onMouseLeave={() => setHov(null)}
               style={{
-                display:"flex", alignItems:"flex-start", gap:16, padding:"16px 20px",
-                background: isSel ? `${c}22` : hov === i ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.04)",
-                border: isSel ? `2px solid ${c}88` : hov === i ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.1)",
-                borderRadius:14, cursor: selecionada !== null ? "default" : "pointer", textAlign:"left",
-                opacity: isDim ? 0.28 : 1, transform: hov === i && selecionada === null ? "translateX(4px)" : "translateX(0)",
-                transition:"all 0.2s ease", width:"100%",
-              }}>
-              <span style={{
-                minWidth:32, height:32, borderRadius:"50%", flexShrink:0,
-                border: isSel ? `2px solid ${c}` : "1px solid rgba(255,255,255,0.18)",
-                background: isSel ? `${c}28` : "transparent",
-                display:"flex", alignItems:"center", justifyContent:"center",
-                fontSize: isSel ? 14 : 13, fontWeight:700, color: isSel ? c : T.textMuted,
-                marginTop:2, transition:"all 0.2s", fontFamily:T.fontBody,
-              }}>
+                background: isSel ? `${c}22` : hov === i ? "rgba(255,255,255,0.08)" : undefined,
+                borderColor: isSel ? `${c}88` : hov === i ? "rgba(232,201,106,0.35)" : undefined,
+              }}
+            >
+              <span
+                className="quiz-opt-letter"
+                style={{
+                  borderColor: isSel ? c : undefined,
+                  background: isSel ? `${c}25` : undefined,
+                  color: isSel ? c : undefined,
+                }}
+              >
                 {isSel ? "✓" : opt.l}
               </span>
-              <span style={{ ...T.body, color: isSel ? T.text : T.textSoft, fontFamily:T.fontBody }}>
-                {opt.texto}
-              </span>
+              <span className="quiz-opt-text">{opt.texto}</span>
             </button>
           );
         })}
@@ -405,50 +409,54 @@ function PastoralCard({ pastoral, rank, aiData, maxPts }) {
   const isFirst = rank === 0;
   return (
     <div style={{
-      background: pastoral.bg, border:`1.5px solid ${pastoral.color}${isFirst ? "99" : "55"}`,
-      borderRadius: isFirst ? 20 : 14, padding: isFirst ? "28px 24px" : "18px 18px",
-      marginBottom: isFirst ? 20 : 12, position:"relative", overflow:"hidden",
-      boxShadow: isFirst ? `0 8px 48px ${pastoral.color}28` : "none",
+      background: pastoral.bg, border:`1px solid ${pastoral.color}${isFirst?"70":"45"}`,
+      borderRadius: isFirst ? 14 : 12, padding: isFirst ? "16px 14px" : "12px 12px",
+      marginBottom: isFirst ? 12 : 8, position:"relative", overflow:"hidden",
+      boxShadow: isFirst ? `0 0 32px ${pastoral.color}22` : "none",
       animation:"fadeUp 0.6s ease both",
     }}>
       {isFirst && (
         <div style={{ position:"absolute", top:-30, right:-30, width:120, height:120, borderRadius:"50%", background:`radial-gradient(circle,${pastoral.color}20,transparent 70%)` }}/>
       )}
-      <div style={{ display:"flex", alignItems:"flex-start", gap:16, marginBottom: isFirst ? 16 : 0 }}>
-        <span style={{ fontSize: isFirst ? 44 : 28, flexShrink:0, lineHeight:1 }}>{pastoral.icon}</span>
+      <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom: isFirst ? 12 : 0 }}>
+        <span style={{ fontSize: isFirst ? 36 : 26, flexShrink:0 }}>{pastoral.icon}</span>
         <div style={{ flex:1, minWidth:0 }}>
           {isFirst && (
-            <Label color={pastoral.color} style={{ marginBottom:8 }}>Sua Principal Pastoral</Label>
+            <div style={{ fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:"0.12em", color:pastoral.color, textTransform:"uppercase", marginBottom:3 }}>
+              Sua Principal Pastoral
+            </div>
           )}
-          <div style={{ fontSize: isFirst ? "clamp(1.25rem, 4vw, 1.5rem)" : "1rem", color:T.text, fontWeight: isFirst ? 600 : 500, lineHeight:1.35, fontFamily:T.fontDisplay }}>
+          <div style={{ fontSize: isFirst ? "clamp(14px,2vh,16px)" : 13, color:T.text, fontWeight:400, lineHeight:1.3 }}>
             {pastoral.nome}
           </div>
           {!isFirst && (
-            <div style={{ marginTop:10, background:"rgba(255,255,255,0.1)", borderRadius:999, height:5 }}>
+            <div style={{ marginTop:6, background:"rgba(255,255,255,0.07)", borderRadius:999, height:3 }}>
               <div style={{ width:`${pct}%`, height:"100%", borderRadius:999, background:pastoral.color, transition:"width 1s ease" }}/>
             </div>
           )}
         </div>
-        <span style={{ fontSize: isFirst ? "1.125rem" : "0.95rem", color:pastoral.color, fontWeight:700, flexShrink:0, fontFamily:T.fontBody }}>{pct}%</span>
+        <span style={{ fontSize: isFirst ? 14 : 12, color:pastoral.color, fontWeight:700, flexShrink:0 }}>{pct}%</span>
       </div>
 
       {isFirst && (
         <>
-          <p style={{ ...T.bodyLg, color:T.textSoft, fontFamily:T.fontBody, margin:"0 0 18px" }}>{pastoral.desc}</p>
+          <p style={{ fontFamily:T.sans, fontSize:12, color:T.textSoft, lineHeight:1.5, margin:"0 0 8px" }}>{pastoral.desc}</p>
           {aiData && (
-            <div style={{ borderTop:"1px solid rgba(255,255,255,0.12)", paddingTop:20, marginBottom:18 }}>
-              <p style={{ ...T.bodyLg, color:T.text, fontFamily:T.fontBody, lineHeight:1.85, margin:"0 0 16px" }}>{aiData.chamado}</p>
-              <p style={{ fontSize:"1.05rem", color:pastoral.color, fontStyle:"italic", margin:"0 0 18px", lineHeight:1.65, fontFamily:T.fontDisplay, fontWeight:500 }}>{aiData.versiculo}</p>
-              {aiData.passos && (
-                <div style={{ background:"rgba(0,0,0,0.28)", padding:"18px 20px", borderRadius:12, borderLeft:`4px solid ${pastoral.color}`, marginBottom:8 }}>
-                  <Label color={pastoral.color} style={{ display:"block", marginBottom:10 }}>Próximos Passos</Label>
-                  <p style={{ ...T.body, color:T.textSoft, fontFamily:T.fontBody, margin:0 }}>{aiData.passos}</p>
-                </div>
-              )}
-            </div>
+            <>
+              <div style={{ borderTop:`1px solid ${T.border}`, paddingTop:10, marginBottom:8 }}>
+                <p style={{ fontFamily:T.sans, fontSize:12, color:T.textSoft, lineHeight:1.55, margin:"0 0 8px" }}>{aiData.chamado}</p>
+                <p style={{ fontSize:11.5, color:pastoral.color, fontStyle:"italic", margin:"0 0 8px" }}>{aiData.versiculo}</p>
+                {aiData.passos && (
+                  <div style={{ background:"rgba(255,255,255,0.04)", padding:"8px 12px", borderRadius:8, borderLeft:`3px solid ${pastoral.color}` }}>
+                    <span style={{ fontFamily:T.sans, fontSize:10, fontWeight:700, color:pastoral.color, display:"block", marginBottom:3, letterSpacing:"0.1em", textTransform:"uppercase" }}>Próximos Passos</span>
+                    <p style={{ fontFamily:T.sans, fontSize:11.5, color:T.muted, lineHeight:1.5, margin:0 }}>{aiData.passos}</p>
+                  </div>
+                )}
+              </div>
+            </>
           )}
           <a href={pastoral.url} target="_blank" rel="noopener noreferrer"
-            style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"12px 20px", background:`${pastoral.color}22`, border:`1.5px solid ${pastoral.color}66`, borderRadius:10, fontSize:"1rem", fontWeight:600, color:pastoral.color, fontFamily:T.fontBody, transition:"all 0.2s" }}>
+            style={{ display:"inline-flex", alignItems:"center", gap:6, padding:"7px 14px", background:`${pastoral.color}15`, border:`1px solid ${pastoral.color}40`, borderRadius:8, fontSize:12, color:pastoral.color, transition:"all 0.2s" }}>
             Ver esta pastoral no site da paróquia →
           </a>
         </>
@@ -476,6 +484,11 @@ export default function App() {
     if (fase === "nome") setTimeout(() => inputRef.current?.focus(), 150);
   }, [fase]);
 
+  useEffect(() => {
+    document.documentElement.classList.toggle("quiz-lock", fase === "quiz");
+    return () => document.documentElement.classList.remove("quiz-lock");
+  }, [fase]);
+
   function iniciar() {
     if (!inputNome.trim()) return;
     setNome(inputNome.trim());
@@ -492,7 +505,6 @@ export default function App() {
       if (qAtual < PERGUNTAS.length - 1) {
         setQAtual(q => q + 1);
         setSelecionada(null);
-        topoRef.current?.scrollIntoView({ behavior:"smooth" });
       } else {
         const s = calcScores(novas);
         const r = getRanking(s);
@@ -525,7 +537,7 @@ export default function App() {
   return (
     <>
       <style>{css}</style>
-      <div style={{ minHeight:"100vh", background:T.bg, fontFamily:T.fontBody, color:T.textSoft, display:"flex", flexDirection:"column" }}>
+      <div className={`app-shell${fase !== "quiz" ? " scrollable" : ""}`} style={{ background:T.bg, fontFamily:T.serif, color:T.text }}>
         {/* Ambiente */}
         <div style={{ position:"fixed", inset:0, pointerEvents:"none", background:"radial-gradient(ellipse 70% 50% at 12% 5%,rgba(201,168,76,.08) 0%,transparent 60%),radial-gradient(ellipse 50% 70% at 88% 95%,rgba(139,0,0,.06) 0%,transparent 60%)" }}/>
 
@@ -533,12 +545,16 @@ export default function App() {
         {fase === "intro" && (
           <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"48px 24px", textAlign:"center", maxWidth:540, margin:"0 auto", animation:"fadeUp 0.5s ease" }}>
             <Cross/>
-            <Label color={T.gold} style={{ marginBottom:6 }}>Paróquia Nossa Senhora de Fátima</Label>
-            <Label color={T.textMuted} style={{ marginBottom:24 }}>Teresina · Piauí · Igreja Católica Apostólica Romana</Label>
-            <h1 style={{ ...T.h1, fontFamily:T.fontDisplay, fontWeight:500, marginBottom:14, color:T.text }}>
-              Teste Vocacional<br/><em style={{ color:T.gold }}>das Pastorais</em>
+            <div style={{ fontSize:10, letterSpacing:4, color:"#C9A84C", textTransform:"uppercase", marginBottom:5 }}>
+              Paróquia Nossa Senhora de Fátima
+            </div>
+            <div style={{ fontSize:9, letterSpacing:3, color:"#5a4a3a", textTransform:"uppercase", marginBottom:22 }}>
+              Teresina · Piauí · Igreja Católica Apostólica Romana
+            </div>
+            <h1 style={{ fontSize:"clamp(22px,6vw,36px)", fontWeight:400, lineHeight:1.25, marginBottom:12, color:"#f5ede0" }}>
+              Teste Vocacional<br/><em style={{ color:"#C9A84C" }}>das Pastorais</em>
             </h1>
-            <p style={{ ...T.bodyLg, color:T.textBody, maxWidth:420, marginBottom:32 }}>
+            <p style={{ fontSize:14.5, color:"#8a7a6a", lineHeight:1.8, maxWidth:400, marginBottom:28 }}>
               Responda {PERGUNTAS.length} perguntas elaboradas para o discernimento vocacional e descubra em qual pastoral da nossa paróquia Deus está te chamando a servir.
             </p>
             <div style={{ display:"flex", gap:7, flexWrap:"wrap", justifyContent:"center", marginBottom:32 }}>
@@ -549,12 +565,12 @@ export default function App() {
             </div>
             <button
               onClick={() => setFase("nome")}
-              style={{ padding:"16px 48px", background:"linear-gradient(135deg,#E8C878,#B8923A)", border:"none", borderRadius:12, color:"#0d0a06", fontSize:"1.05rem", fontWeight:700, cursor:"pointer", fontFamily:T.fontBody, boxShadow:"0 8px 28px rgba(232,200,120,.28)", transition:"transform .2s,box-shadow .2s" }}
+              style={{ padding:"14px 44px", background:"linear-gradient(135deg,#C9A84C,#8B6B2E)", border:"none", borderRadius:12, color:"#0d0a06", fontSize:15, fontWeight:700, cursor:"pointer", fontFamily:"Georgia,serif", boxShadow:"0 8px 28px rgba(201,168,76,.22)", transition:"transform .2s,box-shadow .2s" }}
               onMouseEnter={e => { e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 12px 36px rgba(201,168,76,.3)"; }}
               onMouseLeave={e => { e.currentTarget.style.transform=""; e.currentTarget.style.boxShadow="0 8px 28px rgba(201,168,76,.22)"; }}>
               Iniciar Discernimento ✦
             </button>
-            <p style={{ marginTop:24, ...T.small, color:T.textMuted, fontStyle:"italic", fontFamily:T.fontDisplay }}>
+            <p style={{ marginTop:22, fontSize:11, color:"#3a2a1a", fontStyle:"italic" }}>
               "Cada um recebeu um dom; use-o para servir os outros." — 1 Pe 4,10
             </p>
           </div>
@@ -564,8 +580,8 @@ export default function App() {
         {fase === "nome" && (
           <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"48px 24px", textAlign:"center", maxWidth:420, margin:"0 auto", width:"100%", animation:"fadeUp 0.5s ease" }}>
             <div style={{ fontSize:40, marginBottom:16 }}>🙏</div>
-            <h2 style={{ ...T.h2, fontFamily:T.fontDisplay, fontWeight:500, color:T.text, marginBottom:10 }}>Bem-vindo(a)!</h2>
-            <p style={{ ...T.body, color:T.textBody, marginBottom:32, maxWidth:360 }}>
+            <h2 style={{ fontSize:22, fontWeight:400, color:"#f5ede0", marginBottom:8 }}>Bem-vindo(a)!</h2>
+            <p style={{ fontSize:14, color:"#8a7a6a", lineHeight:1.7, marginBottom:28, maxWidth:340 }}>
               Antes de começar, como você se chama? Seu resultado será personalizado especialmente para você.
             </p>
             <input
@@ -574,7 +590,7 @@ export default function App() {
               onChange={e => setInputNome(e.target.value)}
               onKeyDown={e => e.key === "Enter" && iniciar()}
               placeholder="Digite seu nome..."
-              style={{ width:"100%", padding:"16px 20px", background:"rgba(255,255,255,0.06)", border:"1.5px solid rgba(255,255,255,0.15)", borderRadius:12, color:T.text, fontSize:"1.05rem", fontFamily:T.fontBody, outline:"none", marginBottom:16, textAlign:"center", transition:"border-color 0.2s" }}
+              style={{ width:"100%", padding:"13px 18px", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.12)", borderRadius:12, color:"#f0e8d8", fontSize:15, fontFamily:"Georgia,serif", outline:"none", marginBottom:14, textAlign:"center", transition:"border-color 0.2s" }}
               onFocus={e => e.target.style.borderColor = "rgba(201,168,76,0.45)"}
               onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.12)"}
             />
@@ -590,13 +606,12 @@ export default function App() {
         {/* ── QUIZ ── */}
         {fase === "quiz" && (
           <>
-            <div ref={topoRef} style={{ padding:"11px 18px", borderBottom:"1px solid rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"space-between", background:"rgba(0,0,0,.35)", backdropFilter:"blur(8px)", position:"sticky", top:0, zIndex:10 }}>
-              <span style={{ fontSize:"0.9rem", color:T.textMuted, fontWeight:500 }}>Teste Vocacional · N. Sra. de Fátima</span>
+            <div ref={topoRef} className="quiz-header">
+              <span>Teste Vocacional · N. Sra. de Fátima</span>
               <ProgressDots atual={qAtual} total={PERGUNTAS.length}/>
             </div>
-            <div style={{ flex:1, overflowY:"auto", padding:"30px 18px 20px" }}>
+            <div className="quiz-body">
               <QuestionCard
-                key={qAtual}
                 pergunta={PERGUNTAS[qAtual]}
                 numero={qAtual + 1}
                 total={PERGUNTAS.length}
@@ -610,18 +625,18 @@ export default function App() {
         {/* ── RESULTADO ── */}
         {fase === "resultado" && recomendados.length > 0 && (
           <>
-            <div style={{ padding:"11px 18px", borderBottom:"1px solid rgba(255,255,255,0.05)", background:"rgba(0,0,0,.35)", backdropFilter:"blur(8px)", position:"sticky", top:0, zIndex:10, textAlign:"center" }}>
-              <span style={{ fontSize:"0.95rem", color:T.textBody, fontWeight:500 }}>Resultado Vocacional · {nome}</span>
+            <div className="quiz-header" style={{ justifyContent:"center" }}>
+              <span>Resultado Vocacional · {nome}</span>
             </div>
-            <div style={{ flex:1, overflowY:"auto", padding:"32px 20px 72px", maxWidth:680, margin:"0 auto", width:"100%" }}>
+            <div className="result-scroll" style={{ maxWidth:640, margin:"0 auto", width:"100%" }}>
 
               {/* Cabeçalho do resultado */}
-              <div style={{ textAlign:"center", marginBottom:28, animation:"fadeUp 0.5s ease" }}>
-                <div style={{ display:"inline-block", padding:"6px 18px", border:"1.5px solid rgba(232,200,120,0.45)", borderRadius:999, marginBottom:14 }}>
-                  <Label color={T.gold}>Chamado Identificado</Label>
+              <div style={{ textAlign:"center", marginBottom:24, animation:"fadeUp 0.5s ease" }}>
+                <div style={{ display:"inline-block", padding:"3px 14px", border:"1px solid rgba(201,168,76,0.35)", borderRadius:999, fontSize:9, letterSpacing:4, color:"#C9A84C", textTransform:"uppercase", marginBottom:10 }}>
+                  Chamado Identificado
                 </div>
-                <h2 style={{ ...T.h2, fontFamily:T.fontDisplay, fontWeight:500, color:T.text, margin:0 }}>
-                  O chamado de <em style={{ color:T.gold }}>{nome}</em>
+                <h2 style={{ fontSize:20, fontWeight:400, color:"#f5ede0", margin:0 }}>
+                  O chamado de <em style={{ color:"#C9A84C" }}>{nome}</em>
                 </h2>
               </div>
 
@@ -630,9 +645,9 @@ export default function App() {
 
               {/* Pastorais recomendadas */}
               {recomendados.length > 1 && (
-                <Label color={T.textMuted} style={{ marginBottom:16, textAlign:"center" }}>
+                <div style={{ fontSize:9, letterSpacing:3, color:"#6a5a4a", textTransform:"uppercase", marginBottom:12, textAlign:"center" }}>
                   {recomendados.length === 1 ? "Sua Pastoral Indicada" : "Suas Pastorais Indicadas"}
-                </Label>
+                </div>
               )}
               {recomendados.map((p, i) => (
                 <PastoralCard key={p.id} pastoral={p} rank={i} aiData={i === 0 ? aiData : null} maxPts={maxPts}/>
@@ -641,10 +656,10 @@ export default function App() {
               {/* Dons identificados */}
               {aiData?.dons?.length > 0 && (
                 <div style={{ textAlign:"center", marginBottom:16, animation:"fadeUp 0.5s ease" }}>
-                  <Label color={T.textMuted} style={{ marginBottom:12 }}>Dons Identificados</Label>
-                  <div style={{ display:"flex", flexWrap:"wrap", gap:10, justifyContent:"center" }}>
+                  <div style={{ fontSize:9, letterSpacing:3, color:"#6a5a4a", textTransform:"uppercase", marginBottom:8 }}>Dons Identificados</div>
+                  <div style={{ display:"flex", flexWrap:"wrap", gap:7, justifyContent:"center" }}>
                     {aiData.dons.map(d => (
-                      <span key={d} style={{ padding:"8px 16px", background:"rgba(232,200,120,0.12)", border:"1px solid rgba(232,200,120,0.35)", borderRadius:999, fontSize:"0.95rem", fontWeight:600, color:T.gold, fontFamily:T.fontBody }}>{d}</span>
+                      <span key={d} style={{ padding:"4px 13px", background:"rgba(201,168,76,0.08)", border:"1px solid rgba(201,168,76,0.22)", borderRadius:999, fontSize:11, color:"#C9A84C" }}>{d}</span>
                     ))}
                   </div>
                 </div>
@@ -652,28 +667,28 @@ export default function App() {
 
               {/* Mensagem final */}
               {aiData?.mensagem && (
-                <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.12)", borderRadius:14, padding:"22px 24px", textAlign:"center", marginBottom:20, animation:"fadeUp 0.5s ease" }}>
-                  <p style={{ ...T.bodyLg, color:T.textSoft, lineHeight:1.85, margin:0, fontStyle:"italic", fontFamily:T.fontDisplay }}>"{aiData.mensagem}"</p>
+                <div style={{ background:"rgba(255,255,255,0.025)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:13, padding:"16px 18px", textAlign:"center", marginBottom:16, animation:"fadeUp 0.5s ease" }}>
+                  <p style={{ fontSize:13, color:"#9a8a78", lineHeight:1.85, margin:0, fontStyle:"italic" }}>"{aiData.mensagem}"</p>
                 </div>
               )}
 
               {/* Ranking completo */}
               <details style={{ marginBottom:24 }}>
-                <summary style={{ ...T.label, color:T.textMuted, cursor:"pointer", marginBottom:12, outline:"none", userSelect:"none", padding:"10px 0", fontFamily:T.fontBody }}>
+                <summary style={{ fontSize:10, letterSpacing:3, color:"#5a4a3a", textTransform:"uppercase", cursor:"pointer", marginBottom:12, outline:"none", userSelect:"none", padding:"8px 0" }}>
                   Ver todas as 18 pastorais avaliadas ▾
                 </summary>
                 <div style={{ display:"flex", flexDirection:"column", gap:7, marginTop:12 }}>
                   {ranking.map((p) => {
                     const pct = Math.round((p.pts / (ranking[0].pts || 1)) * 100);
                     return (
-                      <div key={p.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 14px", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10 }}>
-                        <span style={{ fontSize:20, minWidth:26 }}>{p.icon}</span>
+                      <div key={p.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 12px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:8 }}>
+                        <span style={{ fontSize:16, minWidth:22 }}>{p.icon}</span>
                         <div style={{ flex:1, minWidth:0 }}>
-                          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
-                            <span style={{ fontSize:"0.95rem", color:T.textBody, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:"80%", fontFamily:T.fontBody }}>{p.nome}</span>
-                            <span style={{ fontSize:"0.9rem", color:p.color, fontWeight:700, flexShrink:0, marginLeft:6 }}>{pct}%</span>
+                          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
+                            <span style={{ fontSize:11, color:"#8a7a68", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:"80%" }}>{p.nome}</span>
+                            <span style={{ fontSize:10, color:p.color, fontWeight:700, flexShrink:0, marginLeft:6 }}>{pct}%</span>
                           </div>
-                          <div style={{ background:"rgba(255,255,255,0.1)", borderRadius:999, height:5 }}>
+                          <div style={{ background:"rgba(255,255,255,0.06)", borderRadius:999, height:3 }}>
                             <div style={{ width:`${pct}%`, height:"100%", borderRadius:999, background:p.color, transition:"width 1s ease" }}/>
                           </div>
                         </div>
@@ -685,19 +700,19 @@ export default function App() {
 
               {/* Botões finais */}
               <div style={{ textAlign:"center" }}>
-                <p style={{ ...T.body, color:T.textMuted, fontStyle:"italic", marginBottom:22, fontFamily:T.fontBody }}>
+                <p style={{ fontSize:11, color:"#4a3a2a", fontStyle:"italic", marginBottom:18 }}>
                   Converse com o pároco ou coordenador(a) da pastoral para dar os próximos passos no seu serviço!
                 </p>
-                <div style={{ display:"flex", gap:12, justifyContent:"center", flexWrap:"wrap" }}>
+                <div style={{ display:"flex", gap:10, justifyContent:"center", flexWrap:"wrap" }}>
                   <a href="https://nsfatima.org.br/pastorais/" target="_blank" rel="noopener noreferrer"
-                    style={{ padding:"14px 26px", background:"rgba(232,200,120,0.12)", border:"1.5px solid rgba(232,200,120,0.4)", borderRadius:10, color:T.gold, fontSize:"1rem", fontWeight:600, fontFamily:T.fontBody }}>
+                    style={{ padding:"10px 22px", background:"rgba(201,168,76,0.08)", border:"1px solid rgba(201,168,76,0.25)", borderRadius:10, color:"#C9A84C", fontSize:12, fontFamily:"Georgia,serif" }}>
                     Ver todas as pastorais ↗
                   </a>
                   <button
                     onClick={reiniciar}
-                    style={{ padding:"14px 26px", background:"rgba(255,255,255,0.06)", border:"1.5px solid rgba(255,255,255,0.12)", borderRadius:10, color:T.textBody, fontSize:"1rem", cursor:"pointer", fontFamily:T.fontBody, transition:"all 0.2s" }}
-                    onMouseEnter={e => { e.currentTarget.style.background="rgba(255,255,255,0.1)"; e.currentTarget.style.color=T.text; }}
-                    onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,0.06)"; e.currentTarget.style.color=T.textBody; }}>
+                    style={{ padding:"10px 22px", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:10, color:"#9a8a78", fontSize:12, cursor:"pointer", fontFamily:"Georgia,serif", transition:"all 0.2s" }}
+                    onMouseEnter={e => { e.currentTarget.style.background="rgba(255,255,255,0.08)"; e.currentTarget.style.color="#e0d6c8"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,0.04)"; e.currentTarget.style.color="#9a8a78"; }}>
                     Refazer o Teste
                   </button>
                 </div>
