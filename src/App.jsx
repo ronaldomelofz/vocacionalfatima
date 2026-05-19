@@ -555,8 +555,6 @@ export default function App() {
             <div style={{ display:"flex", gap:7, flexWrap:"wrap", justifyContent:"center", marginBottom:32 }}>
               <Pill>{PERGUNTAS.length} perguntas de discernimento</Pill>
               <Pill>18 pastorais avaliadas</Pill>
-              <Pill>~5 minutos</Pill>
-              <Pill>Resultado personalizado por IA</Pill>
             </div>
             <button
               onClick={() => setFase("nome")}
