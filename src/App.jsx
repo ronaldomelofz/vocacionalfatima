@@ -563,7 +563,7 @@ export default function App() {
               onMouseLeave={e => { e.currentTarget.style.transform=""; e.currentTarget.style.boxShadow="0 8px 28px rgba(201,168,76,.22)"; }}>
               Iniciar Discernimento ✦
             </button>
-            <p style={{ marginTop:22, fontSize:11, color:"#3a2a1a", fontStyle:"italic" }}>
+            <p style={{ marginTop:22, fontSize:14.85, color:"#3a2a1a", fontStyle:"italic" }}>
               "Cada um recebeu um dom; use-o para servir os outros." — 1 Pe 4,10
             </p>
           </div>
