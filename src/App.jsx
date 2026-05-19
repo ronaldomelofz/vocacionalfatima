@@ -546,13 +546,7 @@ export default function App() {
         {fase === "intro" && (
           <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"48px 24px", textAlign:"center", maxWidth:540, margin:"0 auto", animation:"fadeUp 0.5s ease" }}>
             <Cross/>
-            <div style={{ fontSize:10, letterSpacing:4, color:"#C9A84C", textTransform:"uppercase", marginBottom:5 }}>
-              Paróquia Nossa Senhora de Fátima
-            </div>
-            <div style={{ fontSize:9, letterSpacing:3, color:"#5a4a3a", textTransform:"uppercase", marginBottom:22 }}>
-              Teresina · Piauí · Igreja Católica Apostólica Romana
-            </div>
-            <h1 style={{ fontSize:"clamp(22px,6vw,36px)", fontWeight:400, lineHeight:1.25, marginBottom:12, color:"#f5ede0" }}>
+            <h1 style={{ fontSize:"clamp(22px,6vw,36px)", fontWeight:400, lineHeight:1.25, marginBottom:12, marginTop:8, color:"#f5ede0" }}>
               Teste Vocacional<br/><em style={{ color:"#C9A84C" }}>das Pastorais</em>
             </h1>
             <p style={{ fontSize:14.5, color:"#8a7a6a", lineHeight:1.8, maxWidth:400, marginBottom:28 }}>
