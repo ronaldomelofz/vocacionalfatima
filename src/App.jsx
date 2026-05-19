@@ -253,16 +253,27 @@ async function chamarIA(prompt) {
   }
 }
 
+// Clareia cor hex para leitura em fundo escuro
+function corViva(hex, mix = 0.42) {
+  const h = hex.replace("#", "");
+  if (h.length !== 6) return hex;
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const f = (c) => Math.min(255, Math.round(c + (255 - c) * mix));
+  return `#${f(r).toString(16).padStart(2, "0")}${f(g).toString(16).padStart(2, "0")}${f(b).toString(16).padStart(2, "0")}`;
+}
+
 // ── PALETA E TIPOGRAFIA ────────────────────────────────────────────────────
 const T = {
   bg: "#0c0a08",
-  surface: "rgba(255,255,255,0.045)",
-  border: "rgba(255,255,255,0.1)",
-  text: "#f6f0e4",
-  textSoft: "#d4c8b4",
-  muted: "#a89880",
-  gold: "#e8c96a",
-  goldDim: "#c9a84c",
+  surface: "rgba(255,255,255,0.06)",
+  border: "rgba(255,255,255,0.14)",
+  text: "#fff9f0",
+  textSoft: "#ede5d5",
+  muted: "#d0c4ae",
+  gold: "#ffd966",
+  goldDim: "#f0c84a",
   sans: "'Segoe UI', system-ui, -apple-system, sans-serif",
   serif: "Georgia, 'Times New Roman', serif",
 };
@@ -301,7 +312,21 @@ const css = `
   .quiz-opt.sel .quiz-opt-text { color: ${T.text}; }
   .result-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 14px 20px; }
   .result-scroll::-webkit-scrollbar { width: 5px; }
-  .result-scroll::-webkit-scrollbar-thumb { background: rgba(232,201,106,0.25); border-radius: 3px; }
+  .result-scroll::-webkit-scrollbar-thumb { background: rgba(255,217,102,0.4); border-radius: 3px; }
+  .result-header span { font-size: 13px; font-weight: 500; color: ${T.textSoft}; letter-spacing: 0.03em; }
+  .result-hero { text-align: center; margin-bottom: 18px; animation: fadeUp 0.5s ease; }
+  .result-badge { display: inline-block; padding: 4px 14px; border: 1px solid rgba(255,217,102,0.55); border-radius: 999px; font-family: ${T.sans}; font-size: 11px; font-weight: 600; letter-spacing: 0.16em; color: ${T.gold}; text-transform: uppercase; margin-bottom: 10px; }
+  .result-title { font-size: clamp(18px, 2.5vh, 22px); font-weight: 400; color: ${T.text}; margin: 0; }
+  .result-title em { color: ${T.gold}; font-style: normal; }
+  .result-label { font-family: ${T.sans}; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; color: ${T.goldDim}; text-transform: uppercase; margin-bottom: 12px; text-align: center; }
+  .result-quote { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,217,102,0.2); border-radius: 13px; padding: 16px 18px; text-align: center; margin-bottom: 16px; }
+  .result-quote p { font-size: 14px; color: ${T.textSoft}; line-height: 1.85; margin: 0; font-style: italic; }
+  .result-footnote { font-family: ${T.sans}; font-size: 12px; color: ${T.muted}; font-style: italic; margin-bottom: 18px; }
+  .result-details summary { font-family: ${T.sans}; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: ${T.goldDim}; text-transform: uppercase; cursor: pointer; padding: 8px 0; }
+  .result-rank-name { font-family: ${T.sans}; font-size: 12px; color: ${T.textSoft}; }
+  .result-don { padding: 5px 14px; background: rgba(255,217,102,0.12); border: 1px solid rgba(255,217,102,0.45); border-radius: 999px; font-family: ${T.sans}; font-size: 12px; font-weight: 600; color: ${T.gold}; }
+  .btn-pastorais { padding: 10px 22px; background: rgba(255,217,102,0.14); border: 1px solid rgba(255,217,102,0.5); border-radius: 10px; color: ${T.gold}; font-size: 13px; font-family: ${T.serif}; }
+  .btn-refazer { padding: 10px 22px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: ${T.textSoft}; font-size: 13px; cursor: pointer; font-family: ${T.serif}; }
   @media (max-width: 560px), (max-height: 620px) {
     .quiz-options { grid-template-columns: 1fr; grid-template-rows: repeat(4, minmax(0, 1fr)); gap: 6px; }
     .quiz-body { padding: 8px 10px 10px; }
@@ -347,7 +372,7 @@ function Spinner() {
   return (
     <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:16, padding:"32px 0" }}>
       <div style={{ width:32, height:32, borderRadius:"50%", border:"2px solid rgba(201,168,76,0.15)", borderTopColor:"#C9A84C", animation:"spin 0.9s linear infinite" }}/>
-      <p style={{ fontSize:13, color:"#6a5a4a", fontStyle:"italic" }}>Gerando seu resultado personalizado...</p>
+      <p style={{ fontSize:13, color:"#E8C96A", fontStyle:"italic" }}>Gerando seu resultado personalizado...</p>
     </div>
   );
 }
@@ -408,56 +433,57 @@ function QuestionCard({ pergunta, numero, total, selecionada, onSelect }) {
 function PastoralCard({ pastoral, rank, aiData, maxPts }) {
   const pct = Math.round((pastoral.pts / maxPts) * 100);
   const isFirst = rank === 0;
+  const accent = corViva(pastoral.color, isFirst ? 0.38 : 0.48);
   return (
     <div style={{
-      background: pastoral.bg, border:`1px solid ${pastoral.color}${isFirst?"70":"45"}`,
+      background: pastoral.bg, border:`1px solid ${accent}${isFirst?"99":"66"}`,
       borderRadius: isFirst ? 14 : 12, padding: isFirst ? "16px 14px" : "12px 12px",
       marginBottom: isFirst ? 12 : 8, position:"relative", overflow:"hidden",
-      boxShadow: isFirst ? `0 0 32px ${pastoral.color}22` : "none",
+      boxShadow: isFirst ? `0 0 36px ${accent}33` : "none",
       animation:"fadeUp 0.6s ease both",
     }}>
       {isFirst && (
-        <div style={{ position:"absolute", top:-30, right:-30, width:120, height:120, borderRadius:"50%", background:`radial-gradient(circle,${pastoral.color}20,transparent 70%)` }}/>
+        <div style={{ position:"absolute", top:-30, right:-30, width:120, height:120, borderRadius:"50%", background:`radial-gradient(circle,${accent}35,transparent 70%)` }}/>
       )}
       <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom: isFirst ? 12 : 0 }}>
         <span style={{ fontSize: isFirst ? 36 : 26, flexShrink:0 }}>{pastoral.icon}</span>
         <div style={{ flex:1, minWidth:0 }}>
           {isFirst && (
-            <div style={{ fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:"0.12em", color:pastoral.color, textTransform:"uppercase", marginBottom:3 }}>
+            <div style={{ fontFamily:T.sans, fontSize:11, fontWeight:700, letterSpacing:"0.12em", color:accent, textTransform:"uppercase", marginBottom:4 }}>
               Sua Principal Pastoral
             </div>
           )}
-          <div style={{ fontSize: isFirst ? "clamp(14px,2vh,16px)" : 13, color:T.text, fontWeight:400, lineHeight:1.3 }}>
+          <div style={{ fontSize: isFirst ? "clamp(15px,2vh,17px)" : 13.5, color: isFirst ? T.text : T.textSoft, fontWeight: isFirst ? 500 : 400, lineHeight:1.3 }}>
             {pastoral.nome}
           </div>
           {!isFirst && (
-            <div style={{ marginTop:6, background:"rgba(255,255,255,0.07)", borderRadius:999, height:3 }}>
-              <div style={{ width:`${pct}%`, height:"100%", borderRadius:999, background:pastoral.color, transition:"width 1s ease" }}/>
+            <div style={{ marginTop:6, background:"rgba(255,255,255,0.1)", borderRadius:999, height:4 }}>
+              <div style={{ width:`${pct}%`, height:"100%", borderRadius:999, background:accent, transition:"width 1s ease" }}/>
             </div>
           )}
         </div>
-        <span style={{ fontSize: isFirst ? 14 : 12, color:pastoral.color, fontWeight:700, flexShrink:0 }}>{pct}%</span>
+        <span style={{ fontSize: isFirst ? 15 : 13, color:accent, fontWeight:700, flexShrink:0 }}>{pct}%</span>
       </div>
 
       {isFirst && (
         <>
-          <p style={{ fontFamily:T.sans, fontSize:12, color:T.textSoft, lineHeight:1.5, margin:"0 0 8px" }}>{pastoral.desc}</p>
+          <p style={{ fontFamily:T.sans, fontSize:13, color:T.textSoft, lineHeight:1.55, margin:"0 0 8px" }}>{pastoral.desc}</p>
           {aiData && (
             <>
               <div style={{ borderTop:`1px solid ${T.border}`, paddingTop:10, marginBottom:8 }}>
-                <p style={{ fontFamily:T.sans, fontSize:12, color:T.textSoft, lineHeight:1.55, margin:"0 0 8px" }}>{aiData.chamado}</p>
-                <p style={{ fontSize:11.5, color:pastoral.color, fontStyle:"italic", margin:"0 0 8px" }}>{aiData.versiculo}</p>
+                <p style={{ fontFamily:T.sans, fontSize:13, color:T.text, lineHeight:1.55, margin:"0 0 8px" }}>{aiData.chamado}</p>
+                <p style={{ fontSize:12.5, color:accent, fontStyle:"italic", margin:"0 0 8px" }}>{aiData.versiculo}</p>
                 {aiData.passos && (
-                  <div style={{ background:"rgba(255,255,255,0.04)", padding:"8px 12px", borderRadius:8, borderLeft:`3px solid ${pastoral.color}` }}>
-                    <span style={{ fontFamily:T.sans, fontSize:10, fontWeight:700, color:pastoral.color, display:"block", marginBottom:3, letterSpacing:"0.1em", textTransform:"uppercase" }}>Próximos Passos</span>
-                    <p style={{ fontFamily:T.sans, fontSize:11.5, color:T.muted, lineHeight:1.5, margin:0 }}>{aiData.passos}</p>
+                  <div style={{ background:"rgba(255,255,255,0.06)", padding:"10px 12px", borderRadius:8, borderLeft:`3px solid ${accent}` }}>
+                    <span style={{ fontFamily:T.sans, fontSize:11, fontWeight:700, color:accent, display:"block", marginBottom:4, letterSpacing:"0.1em", textTransform:"uppercase" }}>Próximos Passos</span>
+                    <p style={{ fontFamily:T.sans, fontSize:12.5, color:T.textSoft, lineHeight:1.5, margin:0 }}>{aiData.passos}</p>
                   </div>
                 )}
               </div>
             </>
           )}
           <a href={pastoral.url} target="_blank" rel="noopener noreferrer"
-            style={{ display:"inline-flex", alignItems:"center", gap:6, padding:"7px 14px", background:`${pastoral.color}15`, border:`1px solid ${pastoral.color}40`, borderRadius:8, fontSize:12, color:pastoral.color, transition:"all 0.2s" }}>
+            style={{ display:"inline-flex", alignItems:"center", gap:6, padding:"8px 14px", background:`${accent}22`, border:`1px solid ${accent}88`, borderRadius:8, fontFamily:T.sans, fontSize:12.5, fontWeight:600, color:accent }}>
             Ver esta pastoral no site da paróquia →
           </a>
         </>
@@ -546,8 +572,8 @@ export default function App() {
         {fase === "intro" && (
           <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"48px 24px", textAlign:"center", maxWidth:540, margin:"0 auto", animation:"fadeUp 0.5s ease" }}>
             <Cross/>
-            <h1 style={{ fontSize:"clamp(22px,6vw,36px)", fontWeight:400, lineHeight:1.25, marginBottom:12, marginTop:8, color:"#f5ede0" }}>
-              Teste Vocacional<br/><em style={{ color:"#C9A84C" }}>das Pastorais</em>
+            <h1 style={{ fontSize:"clamp(22px,6vw,36px)", fontWeight:400, lineHeight:1.25, marginBottom:12, marginTop:8, color:"#FFF9F0" }}>
+              Teste Vocacional<br/><em style={{ color:"#FFD966" }}>das Pastorais</em>
             </h1>
             <p style={{ fontSize:14.5, color:"#8a7a6a", lineHeight:1.8, maxWidth:400, marginBottom:28 }}>
               Responda {PERGUNTAS.length} perguntas elaboradas para o discernimento vocacional e descubra em qual pastoral da nossa paróquia Deus está te chamando a servir.
@@ -573,7 +599,7 @@ export default function App() {
         {fase === "nome" && (
           <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"48px 24px", textAlign:"center", maxWidth:420, margin:"0 auto", width:"100%", animation:"fadeUp 0.5s ease" }}>
             <div style={{ fontSize:40, marginBottom:16 }}>🙏</div>
-            <h2 style={{ fontSize:22, fontWeight:400, color:"#f5ede0", marginBottom:8 }}>Bem-vindo(a)!</h2>
+            <h2 style={{ fontSize:22, fontWeight:400, color:"#FFF9F0", marginBottom:8 }}>Bem-vindo(a)!</h2>
             <p style={{ fontSize:14, color:"#8a7a6a", lineHeight:1.7, marginBottom:28, maxWidth:340 }}>
               Antes de começar, como você se chama? Seu resultado será personalizado especialmente para você.
             </p>
@@ -617,18 +643,18 @@ export default function App() {
         {/* ── RESULTADO ── */}
         {fase === "resultado" && recomendados.length > 0 && (
           <>
-            <div className="quiz-header" style={{ justifyContent:"center" }}>
+            <div className="quiz-header result-header" style={{ justifyContent:"center" }}>
               <span>Resultado Vocacional · {nome}</span>
             </div>
             <div className="result-scroll" style={{ maxWidth:640, margin:"0 auto", width:"100%" }}>
 
               {/* Cabeçalho do resultado */}
               <div style={{ textAlign:"center", marginBottom:24, animation:"fadeUp 0.5s ease" }}>
-                <div style={{ display:"inline-block", padding:"3px 14px", border:"1px solid rgba(201,168,76,0.35)", borderRadius:999, fontSize:9, letterSpacing:4, color:"#C9A84C", textTransform:"uppercase", marginBottom:10 }}>
+                <div style={{ display:"inline-block", padding:"3px 14px", border:"1px solid rgba(255,217,102,0.55)", borderRadius:999, fontSize:9, letterSpacing:4, color:"#FFD966", textTransform:"uppercase", marginBottom:10 }}>
                   Chamado Identificado
                 </div>
-                <h2 style={{ fontSize:20, fontWeight:400, color:"#f5ede0", margin:0 }}>
-                  O chamado de <em style={{ color:"#C9A84C" }}>{nome}</em>
+                <h2 style={{ fontSize:20, fontWeight:400, color:"#FFF9F0", margin:0 }}>
+                  O chamado de <em style={{ color:"#FFD966" }}>{nome}</em>
                 </h2>
               </div>
 
@@ -637,7 +663,7 @@ export default function App() {
 
               {/* Pastorais recomendadas */}
               {recomendados.length > 1 && (
-                <div style={{ fontSize:9, letterSpacing:3, color:"#6a5a4a", textTransform:"uppercase", marginBottom:12, textAlign:"center" }}>
+                <div style={{ fontSize:9, letterSpacing:3, color:"#E8C96A", textTransform:"uppercase", marginBottom:12, textAlign:"center" }}>
                   {recomendados.length === 1 ? "Sua Pastoral Indicada" : "Suas Pastorais Indicadas"}
                 </div>
               )}
@@ -648,10 +674,10 @@ export default function App() {
               {/* Dons identificados */}
               {aiData?.dons?.length > 0 && (
                 <div style={{ textAlign:"center", marginBottom:16, animation:"fadeUp 0.5s ease" }}>
-                  <div style={{ fontSize:9, letterSpacing:3, color:"#6a5a4a", textTransform:"uppercase", marginBottom:8 }}>Dons Identificados</div>
+                  <div style={{ fontSize:9, letterSpacing:3, color:"#E8C96A", textTransform:"uppercase", marginBottom:8 }}>Dons Identificados</div>
                   <div style={{ display:"flex", flexWrap:"wrap", gap:7, justifyContent:"center" }}>
                     {aiData.dons.map(d => (
-                      <span key={d} style={{ padding:"4px 13px", background:"rgba(201,168,76,0.08)", border:"1px solid rgba(201,168,76,0.22)", borderRadius:999, fontSize:11, color:"#C9A84C" }}>{d}</span>
+                      <span key={d} style={{ padding:"4px 13px", background:"rgba(255,217,102,0.14)", border:"1px solid rgba(255,217,102,0.5)", borderRadius:999, fontSize:11, color:"#FFD966" }}>{d}</span>
                     ))}
                   </div>
                 </div>
@@ -659,14 +685,14 @@ export default function App() {
 
               {/* Mensagem final */}
               {aiData?.mensagem && (
-                <div style={{ background:"rgba(255,255,255,0.025)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:13, padding:"16px 18px", textAlign:"center", marginBottom:16, animation:"fadeUp 0.5s ease" }}>
-                  <p style={{ fontSize:13, color:"#9a8a78", lineHeight:1.85, margin:0, fontStyle:"italic" }}>"{aiData.mensagem}"</p>
+                <div style={{ background:"rgba(255,255,255,0.025)", border:"1px solid rgba(255,217,102,0.22)", borderRadius:13, padding:"16px 18px", textAlign:"center", marginBottom:16, animation:"fadeUp 0.5s ease" }}>
+                  <p style={{ fontSize:13, color:"#EDE5D5", lineHeight:1.85, margin:0, fontStyle:"italic" }}>"{aiData.mensagem}"</p>
                 </div>
               )}
 
               {/* Ranking completo */}
               <details style={{ marginBottom:24 }}>
-                <summary style={{ fontSize:10, letterSpacing:3, color:"#5a4a3a", textTransform:"uppercase", cursor:"pointer", marginBottom:12, outline:"none", userSelect:"none", padding:"8px 0" }}>
+                <summary style={{ fontSize:10, letterSpacing:3, color:"#F0C84A", textTransform:"uppercase", cursor:"pointer", marginBottom:12, outline:"none", userSelect:"none", padding:"8px 0" }}>
                   Ver todas as 18 pastorais avaliadas ▾
                 </summary>
                 <div style={{ display:"flex", flexDirection:"column", gap:7, marginTop:12 }}>
@@ -677,7 +703,7 @@ export default function App() {
                         <span style={{ fontSize:16, minWidth:22 }}>{p.icon}</span>
                         <div style={{ flex:1, minWidth:0 }}>
                           <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
-                            <span style={{ fontSize:11, color:"#8a7a68", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:"80%" }}>{p.nome}</span>
+                            <span style={{ fontSize:11, color:"#EDE5D5", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:"80%" }}>{p.nome}</span>
                             <span style={{ fontSize:10, color:p.color, fontWeight:700, flexShrink:0, marginLeft:6 }}>{pct}%</span>
                           </div>
                           <div style={{ background:"rgba(255,255,255,0.06)", borderRadius:999, height:3 }}>
@@ -692,19 +718,19 @@ export default function App() {
 
               {/* Botões finais */}
               <div style={{ textAlign:"center" }}>
-                <p style={{ fontSize:11, color:"#4a3a2a", fontStyle:"italic", marginBottom:18 }}>
+                <p style={{ fontSize:11, color:"#D0C4AE", fontStyle:"italic", marginBottom:18 }}>
                   Converse com o pároco ou coordenador(a) da pastoral para dar os próximos passos no seu serviço!
                 </p>
                 <div style={{ display:"flex", gap:10, justifyContent:"center", flexWrap:"wrap" }}>
                   <a href="https://nsfatima.org.br/pastorais/" target="_blank" rel="noopener noreferrer"
-                    style={{ padding:"10px 22px", background:"rgba(201,168,76,0.08)", border:"1px solid rgba(201,168,76,0.25)", borderRadius:10, color:"#C9A84C", fontSize:12, fontFamily:"Georgia,serif" }}>
+                    style={{ padding:"10px 22px", background:"rgba(255,217,102,0.14)", border:"1px solid rgba(255,217,102,0.5)", borderRadius:10, color:"#FFD966", fontSize:12, fontFamily:"Georgia,serif" }}>
                     Ver todas as pastorais ↗
                   </a>
                   <button
                     onClick={reiniciar}
-                    style={{ padding:"10px 22px", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:10, color:"#9a8a78", fontSize:12, cursor:"pointer", fontFamily:"Georgia,serif", transition:"all 0.2s" }}
+                    style={{ padding:"10px 22px", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:10, color:"#EDE5D5", fontSize:12, cursor:"pointer", fontFamily:"Georgia,serif", transition:"all 0.2s" }}
                     onMouseEnter={e => { e.currentTarget.style.background="rgba(255,255,255,0.08)"; e.currentTarget.style.color="#e0d6c8"; }}
-                    onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,0.04)"; e.currentTarget.style.color="#9a8a78"; }}>
+                    onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,0.04)"; e.currentTarget.style.color=T.textSoft; }}>
                     Refazer o Teste
                   </button>
                 </div>
