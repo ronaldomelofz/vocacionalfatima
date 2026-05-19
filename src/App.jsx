@@ -281,22 +281,23 @@ const css = `
   .app-shell { min-height: 100dvh; max-height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
   .app-shell.scrollable { overflow-y: auto; max-height: none; min-height: 100dvh; }
   .quiz-header { flex-shrink: 0; padding: 8px 16px; border-bottom: 1px solid ${T.border}; background: rgba(0,0,0,0.45); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .quiz-header--progress { justify-content: flex-end; }
   .quiz-header span { font-family: ${T.sans}; font-size: 11px; color: ${T.muted}; letter-spacing: 0.02em; }
   .quiz-body { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 10px 14px 14px; overflow: hidden; }
   .quiz-card { width: 100%; max-width: 720px; max-height: 100%; display: flex; flex-direction: column; gap: 8px; animation: fadeUp 0.35s ease; }
   .quiz-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .quiz-meta .cat { font-family: ${T.sans}; font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: ${T.gold}; }
-  .quiz-meta .num { font-family: ${T.sans}; font-size: 10px; color: ${T.muted}; }
-  .quiz-title { font-size: clamp(15px, 2.2vh, 19px); font-weight: 400; line-height: 1.35; color: ${T.text}; flex-shrink: 0; }
-  .quiz-sub { font-family: ${T.sans}; font-size: clamp(11px, 1.5vh, 12.5px); line-height: 1.4; color: ${T.muted}; font-style: italic; flex-shrink: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .quiz-meta .cat { font-family: ${T.sans}; font-size: 13.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: ${T.gold}; }
+  .quiz-meta .num { font-family: ${T.sans}; font-size: 13.5px; color: ${T.muted}; }
+  .quiz-title { font-size: clamp(20px, 2.97vh, 26px); font-weight: 400; line-height: 1.35; color: ${T.text}; flex-shrink: 0; }
+  .quiz-sub { font-family: ${T.sans}; font-size: clamp(15px, 2.03vh, 17px); line-height: 1.4; color: ${T.muted}; font-style: italic; flex-shrink: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .quiz-options { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; }
   .quiz-opt { display: flex; align-items: flex-start; gap: 8px; padding: 10px 11px; background: ${T.surface}; border: 1px solid ${T.border}; border-radius: 10px; cursor: pointer; text-align: left; width: 100%; height: 100%; transition: border-color 0.15s, background 0.15s, transform 0.15s; overflow: hidden; }
   .quiz-opt:hover:not(:disabled) { background: rgba(255,255,255,0.07); border-color: rgba(232,201,106,0.35); transform: translateY(-1px); }
   .quiz-opt:disabled { cursor: default; }
   .quiz-opt.dim { opacity: 0.25; }
   .quiz-opt.sel { border-width: 1.5px; }
-  .quiz-opt-letter { min-width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: ${T.sans}; font-size: 10px; font-weight: 700; border: 1px solid ${T.border}; color: ${T.muted}; }
-  .quiz-opt-text { font-family: ${T.sans}; font-size: clamp(11px, 1.45vh, 12.5px); line-height: 1.35; color: ${T.textSoft}; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+  .quiz-opt-letter { min-width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: ${T.sans}; font-size: 13.5px; font-weight: 700; border: 1px solid ${T.border}; color: ${T.muted}; }
+  .quiz-opt-text { font-family: ${T.sans}; font-size: clamp(15px, 1.96vh, 17px); line-height: 1.35; color: ${T.textSoft}; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
   .quiz-opt.sel .quiz-opt-text { color: ${T.text}; }
   .result-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 14px 20px; }
   .result-scroll::-webkit-scrollbar { width: 5px; }
@@ -606,8 +607,7 @@ export default function App() {
         {/* ── QUIZ ── */}
         {fase === "quiz" && (
           <>
-            <div ref={topoRef} className="quiz-header">
-              <span>Teste Vocacional · N. Sra. de Fátima</span>
+            <div ref={topoRef} className="quiz-header quiz-header--progress">
               <ProgressDots atual={qAtual} total={PERGUNTAS.length}/>
             </div>
             <div className="quiz-body">
