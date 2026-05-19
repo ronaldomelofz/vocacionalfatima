@@ -327,6 +327,23 @@ const css = `
   .result-don { padding: 5px 14px; background: rgba(255,217,102,0.12); border: 1px solid rgba(255,217,102,0.45); border-radius: 999px; font-family: ${T.sans}; font-size: 12px; font-weight: 600; color: ${T.gold}; }
   .btn-pastorais { padding: 10px 22px; background: rgba(255,217,102,0.14); border: 1px solid rgba(255,217,102,0.5); border-radius: 10px; color: ${T.gold}; font-size: 13px; font-family: ${T.serif}; }
   .btn-refazer { padding: 10px 22px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: ${T.textSoft}; font-size: 13px; cursor: pointer; font-family: ${T.serif}; }
+  .intro-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; text-align: center; max-width: 540px; margin: 0 auto; animation: fadeUp 0.5s ease; }
+  .intro-title { font-size: clamp(22px, 6vw, 36px); font-weight: 400; line-height: 1.25; margin: 8px 0 12px; color: ${T.text}; }
+  .intro-title em { color: ${T.gold}; font-style: italic; }
+  .intro-desc { font-family: ${T.sans}; font-size: 15px; color: ${T.textSoft}; line-height: 1.8; max-width: 400px; margin-bottom: 28px; }
+  .intro-pills { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 32px; }
+  .intro-btn { padding: 14px 44px; background: linear-gradient(135deg, ${T.gold}, ${T.goldDim}); border: none; border-radius: 12px; color: #1a1208; font-size: 15px; font-weight: 700; cursor: pointer; font-family: ${T.serif}; box-shadow: 0 8px 28px rgba(255,217,102,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+  .intro-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(255,217,102,0.38); }
+  .intro-quote { margin-top: 22px; font-size: 14.85px; color: ${T.muted}; font-style: italic; line-height: 1.7; }
+  .nome-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; text-align: center; max-width: 420px; margin: 0 auto; width: 100%; animation: fadeUp 0.5s ease; }
+  .nome-title { font-size: 22px; font-weight: 400; color: ${T.text}; margin-bottom: 8px; }
+  .nome-desc { font-family: ${T.sans}; font-size: 14.5px; color: ${T.textSoft}; line-height: 1.7; margin-bottom: 28px; max-width: 340px; }
+  .nome-input { width: 100%; padding: 13px 18px; background: rgba(255,255,255,0.06); border: 1px solid ${T.border}; border-radius: 12px; color: ${T.text}; font-size: 15px; font-family: ${T.serif}; outline: none; margin-bottom: 14px; text-align: center; transition: border-color 0.2s; }
+  .nome-input::placeholder { color: ${T.muted}; }
+  .nome-input:focus { border-color: rgba(255,217,102,0.55); }
+  .nome-btn { width: 100%; padding: 13px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; font-family: ${T.serif}; transition: all 0.2s; }
+  .nome-btn.on { background: linear-gradient(135deg, ${T.gold}, ${T.goldDim}); color: #1a1208; cursor: pointer; box-shadow: 0 6px 20px rgba(255,217,102,0.25); }
+  .nome-btn.off { background: rgba(255,255,255,0.06); color: ${T.muted}; cursor: default; }
   @media (max-width: 560px), (max-height: 620px) {
     .quiz-options { grid-template-columns: 1fr; grid-template-rows: repeat(4, minmax(0, 1fr)); gap: 6px; }
     .quiz-body { padding: 8px 10px 10px; }
@@ -339,15 +356,15 @@ const css = `
 function Cross() {
   return (
     <div style={{ position:"relative", width:48, height:56, margin:"0 auto 24px", flexShrink:0 }}>
-      <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", width:3, height:50, background:"linear-gradient(180deg,#C9A84C55,#C9A84C)", borderRadius:2 }}/>
-      <div style={{ position:"absolute", top:"30%", left:"50%", transform:"translate(-50%,-50%)", width:30, height:3, background:"linear-gradient(90deg,#C9A84C55,#C9A84C,#C9A84C55)", borderRadius:2 }}/>
+      <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", width:3, height:50, background:`linear-gradient(180deg,${T.gold}55,${T.gold})`, borderRadius:2 }}/>
+      <div style={{ position:"absolute", top:"30%", left:"50%", transform:"translate(-50%,-50%)", width:30, height:3, background:`linear-gradient(90deg,${T.gold}55,${T.gold},${T.gold}55)`, borderRadius:2 }}/>
     </div>
   );
 }
 
 function Pill({ children }) {
   return (
-    <span style={{ padding:"4px 12px", background:T.surface, border:`1px solid ${T.border}`, borderRadius:999, fontSize:11, fontFamily:T.sans, color:T.muted }}>
+    <span style={{ padding:"5px 14px", background:"rgba(255,217,102,0.12)", border:"1px solid rgba(255,217,102,0.4)", borderRadius:999, fontSize:12, fontWeight:600, fontFamily:T.sans, color:T.gold }}>
       {children}
     </span>
   );
@@ -570,26 +587,22 @@ export default function App() {
 
         {/* ── INTRO ── */}
         {fase === "intro" && (
-          <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"48px 24px", textAlign:"center", maxWidth:540, margin:"0 auto", animation:"fadeUp 0.5s ease" }}>
+          <div className="intro-screen">
             <Cross/>
-            <h1 style={{ fontSize:"clamp(22px,6vw,36px)", fontWeight:400, lineHeight:1.25, marginBottom:12, marginTop:8, color:"#FFF9F0" }}>
-              Teste Vocacional<br/><em style={{ color:"#FFD966" }}>das Pastorais</em>
+            <h1 className="intro-title">
+              Teste Vocacional<br/><em>das Pastorais</em>
             </h1>
-            <p style={{ fontSize:14.5, color:"#8a7a6a", lineHeight:1.8, maxWidth:400, marginBottom:28 }}>
+            <p className="intro-desc">
               Responda {PERGUNTAS.length} perguntas elaboradas para o discernimento vocacional e descubra em qual pastoral da nossa paróquia Deus está te chamando a servir.
             </p>
-            <div style={{ display:"flex", gap:7, flexWrap:"wrap", justifyContent:"center", marginBottom:32 }}>
+            <div className="intro-pills">
               <Pill>{PERGUNTAS.length} perguntas de discernimento</Pill>
               <Pill>18 pastorais avaliadas</Pill>
             </div>
-            <button
-              onClick={() => setFase("nome")}
-              style={{ padding:"14px 44px", background:"linear-gradient(135deg,#C9A84C,#8B6B2E)", border:"none", borderRadius:12, color:"#0d0a06", fontSize:15, fontWeight:700, cursor:"pointer", fontFamily:"Georgia,serif", boxShadow:"0 8px 28px rgba(201,168,76,.22)", transition:"transform .2s,box-shadow .2s" }}
-              onMouseEnter={e => { e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 12px 36px rgba(201,168,76,.3)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform=""; e.currentTarget.style.boxShadow="0 8px 28px rgba(201,168,76,.22)"; }}>
+            <button type="button" className="intro-btn" onClick={() => setFase("nome")}>
               Iniciar Discernimento ✦
             </button>
-            <p style={{ marginTop:22, fontSize:14.85, color:"#3a2a1a", fontStyle:"italic" }}>
+            <p className="intro-quote">
               "Cada um recebeu um dom; use-o para servir os outros." — 1 Pe 4,10
             </p>
           </div>
@@ -597,26 +610,26 @@ export default function App() {
 
         {/* ── NOME ── */}
         {fase === "nome" && (
-          <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"48px 24px", textAlign:"center", maxWidth:420, margin:"0 auto", width:"100%", animation:"fadeUp 0.5s ease" }}>
+          <div className="nome-screen">
             <div style={{ fontSize:40, marginBottom:16 }}>🙏</div>
-            <h2 style={{ fontSize:22, fontWeight:400, color:"#FFF9F0", marginBottom:8 }}>Bem-vindo(a)!</h2>
-            <p style={{ fontSize:14, color:"#8a7a6a", lineHeight:1.7, marginBottom:28, maxWidth:340 }}>
+            <h2 className="nome-title">Bem-vindo(a)!</h2>
+            <p className="nome-desc">
               Antes de começar, como você se chama? Seu resultado será personalizado especialmente para você.
             </p>
             <input
               ref={inputRef}
+              className="nome-input"
               value={inputNome}
               onChange={e => setInputNome(e.target.value)}
               onKeyDown={e => e.key === "Enter" && iniciar()}
               placeholder="Digite seu nome..."
-              style={{ width:"100%", padding:"13px 18px", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.12)", borderRadius:12, color:"#f0e8d8", fontSize:15, fontFamily:"Georgia,serif", outline:"none", marginBottom:14, textAlign:"center", transition:"border-color 0.2s" }}
-              onFocus={e => e.target.style.borderColor = "rgba(201,168,76,0.45)"}
-              onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.12)"}
             />
             <button
+              type="button"
+              className={`nome-btn ${inputNome.trim() ? "on" : "off"}`}
               onClick={iniciar}
               disabled={!inputNome.trim()}
-              style={{ width:"100%", padding:"13px", background: inputNome.trim() ? "linear-gradient(135deg,#C9A84C,#8B6B2E)" : "rgba(255,255,255,0.05)", border:"none", borderRadius:12, color: inputNome.trim() ? "#0d0a06" : "#5a4a3a", fontSize:15, fontWeight:700, cursor: inputNome.trim() ? "pointer" : "default", fontFamily:"Georgia,serif", transition:"all 0.2s" }}>
+            >
               Começar →
             </button>
           </div>
