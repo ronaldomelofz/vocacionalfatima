@@ -742,10 +742,6 @@ export default function App() {
               <button type="button" className="primary-button" onClick={() => setStage("profile")}>
                 Começar agora
               </button>
-              <p className="quote">
-                A Pastoral Vocacional será o primeiro stand. Depois, siga para os grupos
-                indicados no seu resultado.
-              </p>
             </div>
           )}
 
