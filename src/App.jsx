@@ -843,7 +843,7 @@ export default function App() {
               <h2>{profile.nome}, olha o que mais combina com você</h2>
               <p className="result-note">
                 De acordo com suas respostas possivelmente você tem dons para servir nas
-                seguintes pastorais abaixo indicado. Não esqueça de conhecê-las hoje.
+                seguintes pastorais. Não esqueça de conhecê-las hoje.
               </p>
 
               <div className="result-grid">
