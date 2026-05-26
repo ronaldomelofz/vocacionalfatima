@@ -701,17 +701,18 @@ export default function App() {
     const nextAnswers = [...answers, option];
     setAnswers(nextAnswers);
 
+    if (currentQuestion === QUESTIONS.length - 1) {
+      setStage("loading");
+      const ranking = construirRanking(profile, nextAnswers);
+      window.setTimeout(() => {
+        setResult(ranking);
+        setStage("result");
+      }, 1200);
+      return;
+    }
+
     window.setTimeout(() => {
-      if (currentQuestion < QUESTIONS.length - 1) {
-        setCurrentQuestion((value) => value + 1);
-      } else {
-        setStage("loading");
-        const ranking = construirRanking(profile, nextAnswers);
-        window.setTimeout(() => {
-          setResult(ranking);
-          setStage("result");
-        }, 1200);
-      }
+      setCurrentQuestion((value) => value + 1);
     }, 260);
   }
 
@@ -833,7 +834,7 @@ export default function App() {
           {stage === "loading" && (
             <div className="screen loading">
               <div className="loading-spinner" />
-              <h2>Analisando...</h2>
+              <h2>Analisando ......</h2>
               <p className="subtitle" style={{ maxWidth: 520 }}>
                 Cruzando seu perfil com os grupos e pastorais da feira de hoje.
               </p>
