@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import logoParoquia from "../LOGONSFATIMA.jpg";
 
 const QUESTION_TIME = 10;
 
@@ -151,6 +152,21 @@ const css = `
   .screen {
     padding: 28px;
   }
+  .brand-logo {
+    width: min(100%, 360px);
+    margin: 0 auto 18px;
+    padding: 10px;
+    border-radius: 24px;
+    background: rgba(255,255,255,0.82);
+    border: 1px solid rgba(124,58,237,0.14);
+    box-shadow: 0 14px 30px rgba(76,29,149,0.1);
+  }
+  .brand-logo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 16px;
+  }
   .intro,
   .profile,
   .loading,
@@ -294,6 +310,12 @@ const css = `
     color: ${COLORS.ink};
     font-size: 17px;
     outline: none;
+  }
+  .input-uppercase {
+    text-transform: uppercase;
+  }
+  .input-uppercase::placeholder {
+    text-transform: none;
   }
   .input:focus {
     border-color: rgba(124,58,237,0.55);
@@ -646,6 +668,14 @@ function ResultCard({ item, rank }) {
   );
 }
 
+function BrandLogo() {
+  return (
+    <div className="brand-logo">
+      <img src={logoParoquia} alt="Paróquia Nossa Senhora de Fátima" />
+    </div>
+  );
+}
+
 export default function App() {
   const [stage, setStage] = useState("intro");
   const [profile, setProfile] = useState(INITIAL_PROFILE);
@@ -736,6 +766,7 @@ export default function App() {
         <div className="panel">
           {stage === "intro" && (
             <div className="screen intro">
+              <BrandLogo />
               <div className="cross" />
               <div className="eyebrow">Feira das Pastorais 2026</div>
               <h1 className="title">Quiz Vocacional</h1>
@@ -747,6 +778,7 @@ export default function App() {
 
           {stage === "profile" && (
             <div className="screen profile">
+              <BrandLogo />
               <div className="eyebrow">Antes de começar</div>
               <h2>Conta pra gente rapidinho</h2>
               <p className="subtitle" style={{ maxWidth: 520 }}>
@@ -757,10 +789,11 @@ export default function App() {
                 <div>
                   <div className="field-label">Seu nome</div>
                   <input
-                    className="input"
+                    className="input input-uppercase"
                     value={profile.nome}
-                    onChange={(event) => updateProfile("nome", event.target.value)}
+                    onChange={(event) => updateProfile("nome", event.target.value.toUpperCase())}
                     placeholder="Digite seu nome"
+                    autoCapitalize="characters"
                   />
                 </div>
                 <div>
@@ -829,6 +862,7 @@ export default function App() {
 
           {stage === "loading" && (
             <div className="screen loading">
+              <BrandLogo />
               <div className="loading-spinner" />
               <h2>Analisando ......</h2>
               <p className="subtitle" style={{ maxWidth: 520 }}>
@@ -839,6 +873,7 @@ export default function App() {
 
           {stage === "result" && topRecommendations.length > 0 && (
             <div className="result">
+              <BrandLogo />
               <div className="eyebrow">Resultado da feira</div>
               <h2>{profile.nome},</h2>
               <p className="result-note">
