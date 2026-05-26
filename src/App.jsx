@@ -737,19 +737,7 @@ export default function App() {
             <div className="screen intro">
               <div className="cross" />
               <div className="eyebrow">Feira das Pastorais 2026</div>
-              <h1 className="title">
-                Quiz Vocacional
-                <span>modo feira jovem</span>
-              </h1>
-              <p className="subtitle">
-                Responda perguntas rápidas, com tempo de 10 segundos, e descubra quais
-                grupos e pastorais da feira mais combinam com você hoje.
-              </p>
-              <div className="chips">
-                <div className="chip">6 perguntas diretas</div>
-                <div className="chip">10 segundos por resposta</div>
-                <div className="chip">18 grupos da feira</div>
-              </div>
+              <h1 className="title">Quiz Vocacional</h1>
               <button type="button" className="primary-button" onClick={() => setStage("profile")}>
                 Começar agora
               </button>
