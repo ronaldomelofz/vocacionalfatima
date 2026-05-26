@@ -153,7 +153,7 @@ const css = `
     padding: 28px;
   }
   .brand-logo {
-    width: min(100%, 360px);
+    width: min(100%, 234px);
     margin: 0 auto 18px;
     padding: 10px;
     border-radius: 24px;
