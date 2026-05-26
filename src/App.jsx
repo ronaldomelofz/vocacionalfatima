@@ -840,7 +840,7 @@ export default function App() {
           {stage === "result" && topRecommendations.length > 0 && (
             <div className="result">
               <div className="eyebrow">Resultado da feira</div>
-              <h2>{profile.nome}, olha o que mais combina com você</h2>
+              <h2>{profile.nome},</h2>
               <p className="result-note">
                 De acordo com suas respostas possivelmente você tem dons para servir nas
                 seguintes pastorais. Não esqueça de conhecê-las hoje.
