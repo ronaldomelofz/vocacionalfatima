@@ -854,9 +854,8 @@ export default function App() {
 
               <div className="result-footer">
                 <p className="result-final">
-                  Comece pelo stand da <strong>Pastoral Vocacional</strong> e depois visite
-                  os grupos indicados para conversar, tirar duvidas e conhecer melhor cada
-                  servico.
+                  Visite os grupos indicados para conversar, tirar duvidas e conhecer melhor
+                  cada servico.
                 </p>
 
                 <div className="mini-list">
