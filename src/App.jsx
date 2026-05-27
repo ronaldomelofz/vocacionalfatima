@@ -118,6 +118,9 @@ const INITIAL_PROFILE = {
   estadoCivil: "solteiro",
 };
 
+const FANTASMA_PATH = "/fantasma";
+const FANTASMA_COUNTER_KEY = "fantasma-access-count";
+
 const css = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body, #root { min-height: 100%; }
@@ -551,6 +554,40 @@ const css = `
     font-size: 14px;
     font-weight: 700;
   }
+  .ghost-screen {
+    padding: 34px 28px;
+    text-align: center;
+  }
+  .ghost-card {
+    width: min(100%, 560px);
+    margin: 0 auto;
+    padding: 24px;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.88);
+    border: 1px solid rgba(124,58,237,0.18);
+    box-shadow: 0 14px 28px rgba(76,29,149,0.1);
+  }
+  .ghost-count-label {
+    margin-top: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: ${COLORS.primary};
+  }
+  .ghost-count-value {
+    margin-top: 8px;
+    font-family: ${COLORS.serif};
+    font-size: clamp(46px, 7vw, 74px);
+    line-height: 1;
+    color: ${COLORS.secondary};
+  }
+  .ghost-help {
+    margin-top: 14px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: ${COLORS.inkSoft};
+  }
   @media (max-width: 760px) {
     .app { padding: 14px; }
     .screen, .result { padding: 22px 18px; }
@@ -676,7 +713,46 @@ function BrandLogo() {
   );
 }
 
+function GhostPage() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const raw = window.localStorage.getItem(FANTASMA_COUNTER_KEY);
+    const current = Number.parseInt(raw || "0", 10);
+    const next = Number.isFinite(current) ? current + 1 : 1;
+    window.localStorage.setItem(FANTASMA_COUNTER_KEY, String(next));
+    setCount(next);
+    document.title = "Fantasma | Vocacional Fátima";
+  }, []);
+
+  return (
+    <>
+      <style>{css}</style>
+      <div className="app">
+        <div className="panel ghost-screen">
+          <BrandLogo />
+          <div className="ghost-card">
+            <div className="eyebrow">Aba Fantasma</div>
+            <h1 className="title">Acesso reservado</h1>
+            <div className="ghost-count-label">Contador de acessos</div>
+            <div className="ghost-count-value">{count}</div>
+            <p className="ghost-help">
+              Esta tela so aparece para quem conhece o endereco direto da rota fantasma.
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function App() {
+  const normalizedPath =
+    typeof window !== "undefined"
+      ? window.location.pathname.replace(/\/+$/, "") || "/"
+      : "/";
+  const isGhostRoute = normalizedPath === FANTASMA_PATH;
+
   const [stage, setStage] = useState("intro");
   const [profile, setProfile] = useState(INITIAL_PROFILE);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -758,6 +834,8 @@ export default function App() {
 
   const canStart = profile.nome.trim() && profile.idade.trim();
   const timerWidth = `${(timeLeft / QUESTION_TIME) * 100}%`;
+
+  if (isGhostRoute) return <GhostPage />;
 
   return (
     <>
