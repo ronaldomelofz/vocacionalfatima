@@ -786,26 +786,28 @@ function BrandLogo() {
 function GhostPage() {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function carregarAcessos() {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`${FANTASMA_ENDPOINT}?t=${Date.now()}`, { method: "GET" });
+      if (!response.ok) throw new Error("Falha ao consultar acessos.");
+      const data = await response.json();
+      setStats(data);
+    } catch {
+      setError("Nao foi possivel carregar os acessos globais neste momento.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     document.title = "Fantasma | Vocacional Fátima";
-
-    async function carregarAcessos() {
-      try {
-        const response = await fetch(FANTASMA_ENDPOINT, {
-          method: "GET",
-        });
-
-        if (!response.ok) throw new Error("Falha ao registrar acesso.");
-
-        const data = await response.json();
-        setStats(data);
-      } catch {
-        setError("Nao foi possivel carregar os acessos globais neste momento.");
-      }
-    }
-
     carregarAcessos();
+    const intervalId = window.setInterval(carregarAcessos, 15000);
+    return () => window.clearInterval(intervalId);
   }, []);
 
   const total = stats?.total ?? "--";
@@ -817,6 +819,7 @@ function GhostPage() {
   const pagesRanking = Object.entries(stats?.pages || {})
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8);
+  const provider = stats?.provider || "--";
 
   return (
     <>
@@ -839,6 +842,9 @@ function GhostPage() {
               <div>
                 <strong>Ultimo acesso:</strong> {lastAccessAt}
               </div>
+              <div>
+                <strong>Origem dos dados:</strong> {provider}
+              </div>
             </div>
             <div className="ghost-pages">
               <strong>Paginas mais acessadas:</strong>
@@ -850,6 +856,15 @@ function GhostPage() {
                 </div>
               ))}
             </div>
+            <button
+              type="button"
+              className="secondary-button"
+              style={{ marginTop: 14 }}
+              onClick={carregarAcessos}
+              disabled={loading}
+            >
+              {loading ? "Atualizando..." : "Atualizar dados"}
+            </button>
             {error && <p className="ghost-help">{error}</p>}
           </div>
         </div>
