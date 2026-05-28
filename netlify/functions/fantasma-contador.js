@@ -35,7 +35,7 @@ async function getBlobStore(event) {
   const { getStore, connectLambda } = await import("@netlify/blobs");
   // Necessário quando a função roda em Lambda compatibility mode.
   connectLambda(event);
-  return getStore({ name: STORE_NAME, consistency: "strong" });
+  return getStore(STORE_NAME);
 }
 
 async function readStats(store) {
