@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import logoParoquia from "../LOGONSFATIMA.jpg";
 
-const QUESTION_TIME = 10;
-
 const COLORS = {
   bgTop: "#fff4d8",
   bgBottom: "#e7f0ff",
@@ -362,7 +360,7 @@ const css = `
     padding: 16px 22px 0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 12px;
   }
   .quiz-progress {
@@ -377,32 +375,9 @@ const css = `
   }
   .quiz-progress-dot.done { background: linear-gradient(90deg, ${COLORS.primary}, ${COLORS.accent}); }
   .quiz-progress-dot.current { background: linear-gradient(90deg, ${COLORS.secondary}, ${COLORS.accent}); }
-  .timer-chip {
-    min-width: 74px;
-    text-align: center;
-    padding: 8px 12px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.88);
-    border: 1px solid rgba(249,115,22,0.22);
-    color: ${COLORS.secondary};
-    font-weight: 800;
-  }
-  .timer-bar {
-    height: 8px;
-    margin: 14px 22px 0;
-    border-radius: 999px;
-    background: rgba(124,58,237,0.1);
-    overflow: hidden;
-  }
-  .timer-fill {
-    height: 100%;
-    background: linear-gradient(90deg, ${COLORS.secondary}, ${COLORS.accent});
-    border-radius: 999px;
-    transition: width 1s linear;
-  }
   .quiz-body {
-    min-height: calc(100dvh - 150px);
-    max-height: calc(100dvh - 150px);
+    min-height: calc(100dvh - 110px);
+    max-height: calc(100dvh - 110px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -885,7 +860,6 @@ export default function App() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [answers, setAnswers] = useState([]);
-  const [timeLeft, setTimeLeft] = useState(QUESTION_TIME);
   const [result, setResult] = useState([]);
 
   useEffect(() => {
@@ -911,21 +885,8 @@ export default function App() {
 
   useEffect(() => {
     if (stage !== "quiz") return;
-    setTimeLeft(QUESTION_TIME);
     setSelectedIndex(null);
   }, [currentQuestion, stage]);
-
-  useEffect(() => {
-    if (stage !== "quiz" || selectedIndex !== null) return;
-    if (timeLeft <= 0) {
-      responder(null);
-      return;
-    }
-    const timer = window.setTimeout(() => {
-      setTimeLeft((value) => value - 1);
-    }, 1000);
-    return () => window.clearTimeout(timer);
-  }, [stage, timeLeft, selectedIndex]);
 
   const topRecommendations = useMemo(() => result.slice(0, 4), [result]);
   const fullRanking = useMemo(() => {
@@ -946,14 +907,13 @@ export default function App() {
     setSelectedIndex(null);
     setAnswers([]);
     setResult([]);
-    setTimeLeft(QUESTION_TIME);
     setStage("quiz");
   }
 
   function responder(optionIndex) {
     if (selectedIndex !== null) return;
-    setSelectedIndex(optionIndex === null ? -1 : optionIndex);
-    const option = optionIndex === null ? null : QUESTIONS[currentQuestion].opcoes[optionIndex];
+    setSelectedIndex(optionIndex);
+    const option = QUESTIONS[currentQuestion].opcoes[optionIndex];
     const nextAnswers = [...answers, option];
     setAnswers(nextAnswers);
 
@@ -979,11 +939,9 @@ export default function App() {
     setSelectedIndex(null);
     setAnswers([]);
     setResult([]);
-    setTimeLeft(QUESTION_TIME);
   }
 
   const canStart = profile.nome.trim() && profile.idade.trim();
-  const timerWidth = `${(timeLeft / QUESTION_TIME) * 100}%`;
 
   if (isGhostRoute) return <GhostPage />;
 
@@ -1071,10 +1029,6 @@ export default function App() {
             <>
               <div className="quiz-header">
                 <Progress current={currentQuestion} total={QUESTIONS.length} />
-                <div className="timer-chip">{timeLeft}s</div>
-              </div>
-              <div className="timer-bar">
-                <div className="timer-fill" style={{ width: timerWidth }} />
               </div>
               <div className="quiz-body">
                 <QuestionCard
