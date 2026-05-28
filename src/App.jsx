@@ -119,7 +119,7 @@ const INITIAL_PROFILE = {
 };
 
 const FANTASMA_PATH = "/fantasma";
-const FANTASMA_COUNTER_KEY = "fantasma-access-count";
+const FANTASMA_ENDPOINT = "/.netlify/functions/fantasma-contador";
 
 const css = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -588,6 +588,17 @@ const css = `
     line-height: 1.6;
     color: ${COLORS.inkSoft};
   }
+  .ghost-meta {
+    margin-top: 14px;
+    display: grid;
+    gap: 8px;
+    text-align: left;
+    font-size: 14px;
+    color: ${COLORS.inkSoft};
+  }
+  .ghost-meta strong {
+    color: ${COLORS.ink};
+  }
   @media (max-width: 760px) {
     .app { padding: 14px; }
     .screen, .result { padding: 22px 18px; }
@@ -714,16 +725,36 @@ function BrandLogo() {
 }
 
 function GhostPage() {
-  const [count, setCount] = useState(0);
+  const [stats, setStats] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const raw = window.localStorage.getItem(FANTASMA_COUNTER_KEY);
-    const current = Number.parseInt(raw || "0", 10);
-    const next = Number.isFinite(current) ? current + 1 : 1;
-    window.localStorage.setItem(FANTASMA_COUNTER_KEY, String(next));
-    setCount(next);
     document.title = "Fantasma | Vocacional Fátima";
+
+    async function registrarAcessoGlobal() {
+      try {
+        const response = await fetch(FANTASMA_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) throw new Error("Falha ao registrar acesso.");
+
+        const data = await response.json();
+        setStats(data);
+      } catch {
+        setError("Nao foi possivel registrar o acesso global neste momento.");
+      }
+    }
+
+    registrarAcessoGlobal();
   }, []);
+
+  const total = stats?.total ?? "--";
+  const uniqueVisitors = stats?.uniqueVisitors ?? "--";
+  const lastAccessAt = stats?.lastAccessAt
+    ? new Date(stats.lastAccessAt).toLocaleString("pt-BR")
+    : "--";
 
   return (
     <>
@@ -735,10 +766,19 @@ function GhostPage() {
             <div className="eyebrow">Aba Fantasma</div>
             <h1 className="title">Acesso reservado</h1>
             <div className="ghost-count-label">Contador de acessos</div>
-            <div className="ghost-count-value">{count}</div>
+            <div className="ghost-count-value">{total}</div>
             <p className="ghost-help">
               Esta tela so aparece para quem conhece o endereco direto da rota fantasma.
             </p>
+            <div className="ghost-meta">
+              <div>
+                <strong>Visitantes unicos:</strong> {uniqueVisitors}
+              </div>
+              <div>
+                <strong>Ultimo acesso:</strong> {lastAccessAt}
+              </div>
+            </div>
+            {error && <p className="ghost-help">{error}</p>}
           </div>
         </div>
       </div>
