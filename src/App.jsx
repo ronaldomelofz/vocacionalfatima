@@ -599,6 +599,22 @@ const css = `
   .ghost-meta strong {
     color: ${COLORS.ink};
   }
+  .ghost-pages {
+    margin-top: 12px;
+    display: grid;
+    gap: 6px;
+    text-align: left;
+    font-size: 14px;
+    color: ${COLORS.inkSoft};
+  }
+  .ghost-page-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(124,58,237,0.06);
+  }
   .full-ranking {
     width: min(100%, 760px);
     margin-top: 8px;
@@ -774,11 +790,10 @@ function GhostPage() {
   useEffect(() => {
     document.title = "Fantasma | Vocacional Fátima";
 
-    async function registrarAcessoGlobal() {
+    async function carregarAcessos() {
       try {
         const response = await fetch(FANTASMA_ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: "GET",
         });
 
         if (!response.ok) throw new Error("Falha ao registrar acesso.");
@@ -786,11 +801,11 @@ function GhostPage() {
         const data = await response.json();
         setStats(data);
       } catch {
-        setError("Nao foi possivel registrar o acesso global neste momento.");
+        setError("Nao foi possivel carregar os acessos globais neste momento.");
       }
     }
 
-    registrarAcessoGlobal();
+    carregarAcessos();
   }, []);
 
   const total = stats?.total ?? "--";
@@ -798,6 +813,9 @@ function GhostPage() {
   const lastAccessAt = stats?.lastAccessAt
     ? new Date(stats.lastAccessAt).toLocaleString("pt-BR")
     : "--";
+  const pagesRanking = Object.entries(stats?.pages || {})
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
 
   return (
     <>
@@ -821,6 +839,16 @@ function GhostPage() {
                 <strong>Ultimo acesso:</strong> {lastAccessAt}
               </div>
             </div>
+            <div className="ghost-pages">
+              <strong>Paginas mais acessadas:</strong>
+              {pagesRanking.length === 0 && <div>Aguardando dados de acesso.</div>}
+              {pagesRanking.map(([path, hits]) => (
+                <div key={path} className="ghost-page-row">
+                  <span>{path}</span>
+                  <strong>{hits}</strong>
+                </div>
+              ))}
+            </div>
             {error && <p className="ghost-help">{error}</p>}
           </div>
         </div>
@@ -843,6 +871,22 @@ export default function App() {
   const [answers, setAnswers] = useState([]);
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME);
   const [result, setResult] = useState([]);
+
+  useEffect(() => {
+    async function registrarAcessoSite() {
+      try {
+        await fetch(FANTASMA_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: normalizedPath }),
+        });
+      } catch {
+        // sem bloqueio de navegação se o endpoint falhar
+      }
+    }
+
+    registrarAcessoSite();
+  }, [normalizedPath]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("quiz-lock", stage === "quiz");
