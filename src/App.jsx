@@ -809,7 +809,8 @@ function GhostPage() {
   }, []);
 
   const total = stats?.total ?? "--";
-  const uniqueVisitors = stats?.uniqueVisitors ?? "--";
+  const uniqueVisitors =
+    typeof stats?.uniqueVisitors === "number" ? stats.uniqueVisitors : "indisponivel";
   const lastAccessAt = stats?.lastAccessAt
     ? new Date(stats.lastAccessAt).toLocaleString("pt-BR")
     : "--";

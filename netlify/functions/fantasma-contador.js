@@ -2,8 +2,7 @@ const crypto = require("node:crypto");
 
 const STORE_NAME = "fantasma-analytics";
 const STATS_KEY = "stats-v1";
-const RECENT_LIMIT = 25;
-const VISITOR_TTL_DAYS = 180;
+const MAX_PATH_LENGTH = 80;
 
 function corsHeaders() {
   return {
@@ -15,6 +14,14 @@ function corsHeaders() {
   };
 }
 
+function normalizePath(path) {
+  if (typeof path !== "string") return "/";
+  const trimmed = path.trim();
+  if (!trimmed) return "/";
+  const safe = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  return safe.slice(0, MAX_PATH_LENGTH);
+}
+
 function getIp(event) {
   return (
     event.headers["x-nf-client-connection-ip"] ||
@@ -24,13 +31,10 @@ function getIp(event) {
   );
 }
 
-function buildVisitorId(ip, userAgent) {
-  return crypto.createHash("sha256").update(`${ip}|${userAgent}`).digest("hex").slice(0, 20);
-}
-
-async function getBlobStore() {
-  // Import dinâmico evita problemas de compatibilidade de módulo no runtime.
-  const { getStore } = await import("@netlify/blobs");
+async function getBlobStore(event) {
+  const { getStore, connectLambda } = await import("@netlify/blobs");
+  // Necessário quando a função roda em Lambda compatibility mode.
+  connectLambda(event);
   return getStore(STORE_NAME);
 }
 
@@ -42,44 +46,48 @@ async function readStats(store) {
     firstAccessAt: null,
     lastAccessAt: null,
     lastAccess: null,
-    knownVisitors: {},
-    recent: [],
     pages: {},
+    knownVisitors: {},
+    provider: "netlify-blobs",
   };
+
   if (!saved || typeof saved !== "object") return base;
+
   return {
     ...base,
     ...saved,
+    pages: saved.pages && typeof saved.pages === "object" ? saved.pages : {},
     knownVisitors:
       saved.knownVisitors && typeof saved.knownVisitors === "object" ? saved.knownVisitors : {},
-    recent: Array.isArray(saved.recent) ? saved.recent : [],
-    pages: saved.pages && typeof saved.pages === "object" ? saved.pages : {},
+    provider: "netlify-blobs",
   };
 }
 
 function sanitizeStats(stats) {
   return {
-    total: stats.total || 0,
-    uniqueVisitors: stats.uniqueVisitors || 0,
+    total: Number(stats.total) || 0,
+    uniqueVisitors: Number(stats.uniqueVisitors) || 0,
     firstAccessAt: stats.firstAccessAt || null,
     lastAccessAt: stats.lastAccessAt || null,
     lastAccess: stats.lastAccess || null,
-    recent: Array.isArray(stats.recent) ? stats.recent.slice(0, RECENT_LIMIT) : [],
     pages: stats.pages || {},
+    provider: stats.provider || "netlify-blobs",
   };
 }
 
 exports.handler = async function handler(event) {
   const method = event.httpMethod;
+
   if (method === "OPTIONS") {
     return { statusCode: 204, headers: corsHeaders(), body: "" };
   }
+
   if (method !== "GET" && method !== "POST") {
     return { statusCode: 405, headers: corsHeaders(), body: "Method Not Allowed" };
   }
 
   try {
-    const store = await getBlobStore();
+    const store = await getBlobStore(event);
     const stats = await readStats(store);
 
     if (method === "GET") {
@@ -93,9 +101,7 @@ exports.handler = async function handler(event) {
     let pagePath = "/";
     try {
       const body = JSON.parse(event.body || "{}");
-      if (typeof body.path === "string" && body.path.trim()) {
-        pagePath = body.path.trim().slice(0, 120);
-      }
+      pagePath = normalizePath(body.path || "/");
     } catch {
       pagePath = "/";
     }
@@ -106,31 +112,18 @@ exports.handler = async function handler(event) {
     const country = event.headers["x-country"] || "desconhecido";
     const region = event.headers["x-region"] || "";
     const city = event.headers["x-city"] || "";
-    const visitorId = buildVisitorId(ip, userAgent);
-    const ttlCutoff = Date.now() - VISITOR_TTL_DAYS * 24 * 60 * 60 * 1000;
+    const visitorId = crypto.createHash("sha256").update(`${ip}|${userAgent}`).digest("hex").slice(0, 20);
 
-    for (const [id, lastSeen] of Object.entries(stats.knownVisitors)) {
-      const lastSeenTime = new Date(lastSeen).getTime();
-      if (!Number.isFinite(lastSeenTime) || lastSeenTime < ttlCutoff) {
-        delete stats.knownVisitors[id];
-      }
-    }
-
-    const isNewVisitor = !stats.knownVisitors[visitorId];
-    if (isNewVisitor) {
+    if (!stats.knownVisitors[visitorId]) {
       stats.uniqueVisitors += 1;
     }
 
     stats.total += 1;
     stats.firstAccessAt = stats.firstAccessAt || now;
     stats.lastAccessAt = now;
-    stats.lastAccess = { at: now, country, region, city, path: pagePath };
+    stats.lastAccess = { at: now, path: pagePath, country, region, city };
     stats.knownVisitors[visitorId] = now;
     stats.pages[pagePath] = (Number(stats.pages[pagePath]) || 0) + 1;
-    stats.recent = [
-      { at: now, country, region, city, visitorId, path: pagePath },
-      ...(Array.isArray(stats.recent) ? stats.recent : []),
-    ].slice(0, RECENT_LIMIT);
 
     await store.setJSON(STATS_KEY, stats);
 
