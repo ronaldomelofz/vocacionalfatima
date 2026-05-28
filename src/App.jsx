@@ -599,6 +599,49 @@ const css = `
   .ghost-meta strong {
     color: ${COLORS.ink};
   }
+  .full-ranking {
+    width: min(100%, 760px);
+    margin-top: 8px;
+    display: grid;
+    gap: 8px;
+  }
+  .full-ranking-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.78);
+    border: 1px solid rgba(124,58,237,0.14);
+  }
+  .full-ranking-pos {
+    min-width: 34px;
+    text-align: center;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: rgba(124,58,237,0.1);
+    color: ${COLORS.primary};
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .full-ranking-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: ${COLORS.ink};
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .full-ranking-pct {
+    min-width: 64px;
+    text-align: right;
+    color: ${COLORS.secondary};
+    font-size: 15px;
+    font-weight: 800;
+  }
   @media (max-width: 760px) {
     .app { padding: 14px; }
     .screen, .result { padding: 22px 18px; }
@@ -825,6 +868,13 @@ export default function App() {
   }, [stage, timeLeft, selectedIndex]);
 
   const topRecommendations = useMemo(() => result.slice(0, 4), [result]);
+  const fullRanking = useMemo(() => {
+    const topPoints = result[0]?.pontos || 0;
+    return result.map((item) => ({
+      ...item,
+      percentual: topPoints > 0 ? Math.round((item.pontos / topPoints) * 100) : 0,
+    }));
+  }, [result]);
 
   function updateProfile(field, value) {
     setProfile((current) => ({ ...current, [field]: value }));
@@ -1011,10 +1061,15 @@ export default function App() {
                   cada servico.
                 </p>
 
-                <div className="mini-list">
-                  {result.slice(4, 10).map((item) => (
-                    <div key={item.id} className="mini-item">
-                      {item.icon} {item.nome}
+                <div className="full-ranking">
+                  {fullRanking.map((item, index) => (
+                    <div key={item.id} className="full-ranking-item">
+                      <div className="full-ranking-pos">{index + 1}º</div>
+                      <div className="full-ranking-name">
+                        <span>{item.icon}</span>
+                        <span>{item.nome}</span>
+                      </div>
+                      <div className="full-ranking-pct">{item.percentual}%</div>
                     </div>
                   ))}
                 </div>
